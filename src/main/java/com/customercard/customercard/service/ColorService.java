@@ -52,16 +52,32 @@ public class ColorService {
         }
     }
 
-    public boolean createColor(Color color) {
+    public Color createColor(Color color) {
+
+        if (validateIfExists(color)) {
+            return repo
+                    .findByName(color.getName())
+                    .stream()
+                    .findFirst()
+                    .orElseThrow();
+        }
+
         LOGGER.info("Color created.");
-        repo.save(color);
-        return true;
+        return repo.save(color);
+
     }
 
-    public boolean updateColor(Color color) {
+    public Color updateColor(Color color) {
+
+        if (validateIfExists(color)) {
+            return repo
+                    .findByName(color.getName())
+                    .stream()
+                    .findFirst()
+                    .orElseThrow();
+        }
         LOGGER.info("Color updated.");
-        repo.save(color);
-        return true;
+        return repo.save(color);
     }
 
     public boolean deleteColor(String id) {
@@ -79,4 +95,11 @@ public class ColorService {
         return true;
     }
 
+    public boolean validateIfExists(Color color) {
+        if (repo.findByName(color.getName()).size() > 0) {
+            LOGGER.info("Color already exists.");
+            return true;
+        }
+        return false;
+    }
 }
