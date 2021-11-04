@@ -36,3 +36,18 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+### MAIN ###
+src/main/resources/application.properties
+gradlew
+gradlew.bat
+package.json
+package-lock.json
+webpack.config.js
+webpack.generated.js
+target
+config
+frontend
+gradle
+.gitignore
