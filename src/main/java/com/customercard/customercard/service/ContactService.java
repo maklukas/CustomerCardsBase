@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
+@Service("contactService")
 public class ContactService {
 
     private final ContactRepo repo;
@@ -56,16 +56,24 @@ public class ContactService {
         }
     }
 
-    public boolean createContact(Contact contact) {
+    public Contact createContact(Contact contact) {
+
+        if (validateIfExists(contact)) {
+            return findFirstEqual(contact);
+        }
+
         LOGGER.info("Contact created.");
-        repo.save(contact);
-        return true;
+        return repo.save(contact);
     }
 
-    public boolean updateContact(Contact contact) {
+    public Contact updateContact(Contact contact) {
+
+        if (validateIfExists(contact)) {
+            return findFirstEqual(contact);
+        }
+
         LOGGER.info("Contact updated.");
-        repo.save(contact);
-        return true;
+        return repo.save(contact);
     }
 
     public boolean deleteContact(String id) {
@@ -93,6 +101,26 @@ public class ContactService {
         }
         updateContact(contact);
         return true;
+    }
+
+    public boolean validateIfExists(Contact contact) {
+
+        if (findFirstEqual(contact) != null) {
+            LOGGER.info("Contact already exists.");
+            return true;
+        }
+        return false;
+    }
+
+    public Contact findFirstEqual(Contact contact) {
+        if (repo.findAll().size() > 0) {
+            return repo.findAll().stream()
+                    .filter(c -> c.equals(contact))
+                    .findFirst()
+                    .orElse(contact);
+        }
+
+        return null;
     }
 
 }

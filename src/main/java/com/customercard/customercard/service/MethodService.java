@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
+@Service("methodService")
 public class MethodService {
 
     private final MethodRepo repo;
@@ -52,16 +52,24 @@ public class MethodService {
         }
     }
 
-    public boolean createMethod(Method method) {
+    public Method createMethod(Method method) {
+
+        if (validateIfExists(method)) {
+            return findFirstByName(method.getName());
+        }
+
         LOGGER.info("Method created.");
-        repo.save(method);
-        return true;
+        return repo.save(method);
     }
 
-    public boolean updateMethod(Method method) {
+    public Method updateMethod(Method method) {
+
+        if (validateIfExists(method)) {
+            return findFirstByName(method.getName());
+        }
+
         LOGGER.info("Method updated.");
-        repo.save(method);
-        return true;
+        return repo.save(method);
     }
 
     public boolean deleteMethod(String id) {
@@ -77,5 +85,21 @@ public class MethodService {
         }
         updateMethod(method);
         return true;
+    }
+
+    public boolean validateIfExists(Method method) {
+        if (repo.findByName(method.getName()).size() > 0) {
+            LOGGER.info("Method already exists.");
+            return true;
+        }
+        return false;
+    }
+
+    public Method findFirstByName(String name) {
+        return repo
+                .findByName(name)
+                .stream()
+                .findFirst()
+                .orElseThrow();
     }
 }

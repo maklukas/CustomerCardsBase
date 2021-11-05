@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
+@Service("styleService")
 public class StyleService {
 
     private final StyleRepo repo;
@@ -52,16 +52,24 @@ public class StyleService {
         }
     }
 
-    public boolean createStyle(Style style) {
+    public Style createStyle(Style style) {
+
+        if (validateIfExists(style)) {
+            return findFirstByName(style.getName());
+        }
+
         LOGGER.info("Style created.");
-        repo.save(style);
-        return true;
+        return repo.save(style);
     }
 
-    public boolean updateStyle(Style style) {
+    public Style updateStyle(Style style) {
+
+        if (validateIfExists(style)) {
+            return findFirstByName(style.getName());
+        }
+
         LOGGER.info("Style updated.");
-        repo.save(style);
-        return true;
+        return repo.save(style);
     }
 
     public boolean deleteStyle(String id) {
@@ -77,5 +85,21 @@ public class StyleService {
         }
         updateStyle(style);
         return true;
+    }
+
+    public boolean validateIfExists(Style style) {
+        if (repo.findByName(style.getName()).size() > 0) {
+            LOGGER.info("Style already exists.");
+            return true;
+        }
+        return false;
+    }
+
+    public Style findFirstByName(String name) {
+        return repo
+                .findByName(name)
+                .stream()
+                .findFirst()
+                .orElseThrow();
     }
 }

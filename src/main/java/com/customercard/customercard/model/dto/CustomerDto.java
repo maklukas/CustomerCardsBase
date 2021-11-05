@@ -1,5 +1,6 @@
 package com.customercard.customercard.model.dto;
 
+import com.customercard.customercard.model.Contact;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,8 +17,8 @@ public class CustomerDto {
     private String name;
     private String surname;
     private String comment;
+    private ContactDto contact;
     private List<LashesDto> lashesList;
-
 
     public CustomerDto(String name, String surname) {
         this.name = name;

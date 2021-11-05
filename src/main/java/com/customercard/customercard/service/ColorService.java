@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
+@Service("colorService")
 public class ColorService {
 
     private final ColorRepo repo;
@@ -55,11 +55,7 @@ public class ColorService {
     public Color createColor(Color color) {
 
         if (validateIfExists(color)) {
-            return repo
-                    .findByName(color.getName())
-                    .stream()
-                    .findFirst()
-                    .orElseThrow();
+            return findFirstByName(color.getName());
         }
 
         LOGGER.info("Color created.");
@@ -70,11 +66,7 @@ public class ColorService {
     public Color updateColor(Color color) {
 
         if (validateIfExists(color)) {
-            return repo
-                    .findByName(color.getName())
-                    .stream()
-                    .findFirst()
-                    .orElseThrow();
+            return findFirstByName(color.getName());
         }
         LOGGER.info("Color updated.");
         return repo.save(color);
@@ -101,5 +93,13 @@ public class ColorService {
             return true;
         }
         return false;
+    }
+
+    public Color findFirstByName(String name) {
+        return repo
+                .findByName(name)
+                .stream()
+                .findFirst()
+                .orElseThrow();
     }
 }

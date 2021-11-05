@@ -1,5 +1,6 @@
 package com.customercard.customercard.service;
 
+import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Lashes;
 import com.customercard.customercard.repository.CustomerRepo;
@@ -12,35 +13,38 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
-@Service
+@Service("customerService")
 public class CustomerService {
 
-    private CustomerRepo repo;
     private Logger LOGGER = LoggerFactory.getLogger(CustomerService.class);
+    private final CustomerRepo repo;
+    private final LashesService lashesService;
+    private final ContactService contactService;
 
     @Autowired
-    public CustomerService(CustomerRepo repo) {
+    public CustomerService(CustomerRepo repo, LashesService lashesService, ContactService contactService) {
         this.repo = repo;
+        this.lashesService = lashesService;
+        this.contactService = contactService;
     }
 
-    public boolean createCustomer(Customer customer) {
-        repo.save(customer);
 
+
+
+    public Customer createCustomer(Customer customer) {
         LOGGER.info("Customer added.");
-        return true;
+        createSubClasses(customer);
+        return repo.save(customer);
     }
 
-    public boolean updateCustomer(Customer customer) {
-        repo.save(customer);
+    public Customer updateCustomer(Customer customer) {
+        createSubClasses(customer);
         LOGGER.info("Customer updated.");
-        return true;
+        return repo.save(customer);
     }
 
     public boolean deleteCustomer(String id) {
@@ -113,12 +117,37 @@ public class CustomerService {
         if (updates.containsKey("comment")) {
             customer.setComment((String) updates.get("comment"));
         }
+        if (updates.containsKey("contact")) {
+            customer.setContact((Contact) updates.get("contact"));
+        }
         if (updates.containsKey("lashesList")) {
-            //TODO check is it work fine..
             customer.setLashesList(List.of((Lashes) updates.get("lashesList")));
         }
         updateCustomer(customer);
         return true;
+    }
+
+    private void createSubClasses(Customer customer) {
+        createLashesList(customer);
+        createContact(customer);
+    }
+
+    private void createLashesList(Customer customer) {
+        List<Lashes> lashesList = customer.getLashesList();
+        List<Lashes> newList = new ArrayList<>();
+
+        if (lashesList.size() > 0) {
+            for (Lashes theLash: lashesList) {
+                newList.add(lashesService.createLashes(theLash));
+            }
+        }
+        customer.setLashesList(newList);
+    }
+
+    private void createContact(Customer customer) {
+        if (customer.getContact() != null) {
+            customer.setContact(contactService.createContact(customer.getContact()));
+        }
     }
 
 }

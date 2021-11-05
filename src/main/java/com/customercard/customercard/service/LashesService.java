@@ -1,9 +1,6 @@
 package com.customercard.customercard.service;
 
-import com.customercard.customercard.model.Color;
-import com.customercard.customercard.model.Lashes;
-import com.customercard.customercard.model.Method;
-import com.customercard.customercard.model.Style;
+import com.customercard.customercard.model.*;
 import com.customercard.customercard.repository.LashesRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -17,16 +14,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
+@Service("lashesService")
 public class LashesService {
 
-    private final LashesRepo repo;
     private static Logger LOGGER = LoggerFactory.getLogger(LashesService.class);
+    private final LashesRepo repo;
+    private final MethodService methodService;
+    private final StyleService styleService;
+    private final ColorService colorService;
+
+    public LashesService(LashesRepo repo, MethodService methodService, StyleService styleService, ColorService colorService) {
+        this.repo = repo;
+        this.methodService = methodService;
+        this.styleService = styleService;
+        this.colorService = colorService;
+    }
 
     @Autowired
-    public LashesService(LashesRepo repo) {
-        this.repo = repo;
-    }
+
 
     public List<Lashes> getAllLashes() {
         LOGGER.info("All Lashes fetched.");
@@ -57,25 +62,37 @@ public class LashesService {
         }
     }
 
-    public boolean createLashes(Lashes lashes) {
+    public Lashes createLashes(Lashes lashes) {
         LOGGER.info("Lashes created.");
 
+        if (validateIfExists(lashes)) {
+            return findFirstEqual(lashes);
+        }
+
+        setDates(lashes);
+        setSubClasses(lashes);
+
+        return repo.save(lashes);
+    }
+
+    private void setDates(Lashes lashes) {
         if (lashes.getDate() == null) {
             lashes.setDate(LocalDate.now());
         }
-
         if (lashes.getNextDate() == null) {
             lashes.setDate(LocalDate.now().plusWeeks(2));
         }
-
-        repo.save(lashes);
-        return true;
     }
 
-    public boolean updateLashes(Lashes lashes) {
+    public Lashes updateLashes(Lashes lashes) {
+
+        if (validateIfExists(lashes)) {
+            return findFirstEqual(lashes);
+        }
+
+        setSubClasses(lashes);
         LOGGER.info("Lashes updated.");
-        repo.save(lashes);
-        return true;
+        return repo.save(lashes);
     }
 
     public boolean deleteLashes(String id) {
@@ -107,4 +124,55 @@ public class LashesService {
         updateLashes(lashes);
         return true;
     }
+
+
+    private void setSubClasses(Lashes lashes) {
+        getMethodClass(lashes);
+        getStyleClass(lashes);
+        getColorClass(lashes);
+    }
+
+    private void getColorClass(Lashes lashes) {
+        if (colorService.validateIfExists(lashes.getColor())) {
+            lashes.setColor(colorService.findFirstByName(lashes.getColor().getName()));
+        } else {
+            lashes.setColor(colorService.createColor(lashes.getColor()));
+        }
+    }
+
+    private void getStyleClass(Lashes lashes) {
+        if (styleService.validateIfExists(lashes.getStyle())) {
+            lashes.setStyle(styleService.findFirstByName(lashes.getStyle().getName()));
+        } else {
+            lashes.setStyle(styleService.createStyle(lashes.getStyle()));
+        }
+    }
+
+    private void getMethodClass(Lashes lashes) {
+        if (methodService.validateIfExists(lashes.getMethod())) {
+            lashes.setMethod(methodService.findFirstByName(lashes.getMethod().getName()));
+        } else {
+            lashes.setMethod(methodService.createMethod(lashes.getMethod()));
+        }
+    }
+
+    public boolean validateIfExists(Lashes lashes) {
+
+        if (findFirstEqual(lashes) != null) {
+            LOGGER.info("Lashes already exists.");
+            return true;
+        }
+        return false;
+    }
+
+    public Lashes findFirstEqual(Lashes lashes) {
+        if (repo.findAll().size() > 0) {
+            return repo.findAll().stream()
+                    .filter(l -> l.equals(lashes))
+                    .findFirst()
+                    .orElse(lashes);
+        }
+        return null;
+    }
+
 }

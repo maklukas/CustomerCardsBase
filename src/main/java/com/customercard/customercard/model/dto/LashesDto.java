@@ -1,6 +1,5 @@
 package com.customercard.customercard.model.dto;
 
-import com.customercard.customercard.model.Color;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +13,7 @@ public class LashesDto {
     private String id;
     private StyleDto style;
     private MethodDto method;
-    private Color color;
+    private ColorDto color;
     private String comment;
     private LocalDate date;
     private LocalDate nextDate;
