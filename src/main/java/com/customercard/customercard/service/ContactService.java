@@ -117,7 +117,7 @@ public class ContactService {
             return repo.findAll().stream()
                     .filter(c -> c.equals(contact))
                     .findFirst()
-                    .orElse(contact);
+                    .orElse(null);
         }
 
         return null;

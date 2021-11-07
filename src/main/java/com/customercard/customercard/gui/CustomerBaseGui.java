@@ -1,4 +1,4 @@
-package com.customercard.customercard.controller;
+package com.customercard.customercard.gui;
 
 import com.customercard.customercard.mapper.CustomerGeneralMapper;
 import com.customercard.customercard.model.dto.CustomerGeneralDto;
@@ -8,12 +8,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
 @Route("")
-public class BaseController extends VerticalLayout {
+public class CustomerBaseGui extends VerticalLayout {
 
     private final CustomerService service;
     private final CustomerGeneralMapper customerGeneralMapper;
 
-    public BaseController(CustomerService service, CustomerGeneralMapper customerGeneralMapper) {
+    public CustomerBaseGui(CustomerService service, CustomerGeneralMapper customerGeneralMapper) {
         this.service = service;
         this.customerGeneralMapper = customerGeneralMapper;
         setCustomerGrid();

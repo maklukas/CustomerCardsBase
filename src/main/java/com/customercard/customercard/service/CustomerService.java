@@ -32,9 +32,6 @@ public class CustomerService {
         this.contactService = contactService;
     }
 
-
-
-
     public Customer createCustomer(Customer customer) {
         LOGGER.info("Customer added.");
         createSubClasses(customer);
@@ -128,8 +125,12 @@ public class CustomerService {
     }
 
     private void createSubClasses(Customer customer) {
-        createLashesList(customer);
-        createContact(customer);
+        if (customer.getLashesList() != null) {
+            createLashesList(customer);
+        }
+        if (customer.getContact() != null) {
+            createContact(customer);
+        }
     }
 
     private void createLashesList(Customer customer) {
@@ -141,6 +142,7 @@ public class CustomerService {
                 newList.add(lashesService.createLashes(theLash));
             }
         }
+
         customer.setLashesList(newList);
     }
 

@@ -80,7 +80,7 @@ public class LashesService {
             lashes.setDate(LocalDate.now());
         }
         if (lashes.getNextDate() == null) {
-            lashes.setDate(LocalDate.now().plusWeeks(2));
+            lashes.setNextDate(LocalDate.now().plusWeeks(2));
         }
     }
 
@@ -170,7 +170,7 @@ public class LashesService {
             return repo.findAll().stream()
                     .filter(l -> l.equals(lashes))
                     .findFirst()
-                    .orElse(lashes);
+                    .orElse(null);
         }
         return null;
     }
