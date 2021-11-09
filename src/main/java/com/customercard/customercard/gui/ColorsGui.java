@@ -13,8 +13,10 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -30,7 +32,7 @@ public class ColorsGui extends VerticalLayout {
     public ColorsGui(ColorService colorService, ColorMapper colorMapper) {
         this.colorService = colorService;
         this.colorMapper = colorMapper;
-        add(getFindTextFieldComponent(), getIconComponent());
+        add(getFindTextFieldComponent(), plusIconComponent());
         add(getColorsGrid());
     }
 
@@ -47,17 +49,24 @@ public class ColorsGui extends VerticalLayout {
             }
             getColorsGrid();
         });
+
+        textField.setValueChangeMode(ValueChangeMode.EAGER);
+
         return textField;
     }
 
-    public Icon getIconComponent() {
+    public Icon plusIconComponent() {
         Icon icon = new Icon(VaadinIcon.PLUS_CIRCLE);
-        icon.setColor("blue");
-        icon.addClickListener(it -> {
-            popupCreate();
-        });
+        String mouseOutColor = "#0006c7";
+        icon.setColor(mouseOutColor);
+        icon.addClickListener(it -> popupCreate());
+
+        icon.getElement().addEventListener("mouseover", it -> icon.setColor("#0007f2"));
+        icon.getElement().addEventListener("mouseout", it -> icon.setColor(mouseOutColor));
+
         return icon;
     }
+
 
     private Grid<ColorDto> getColorsGrid() {
         Grid<ColorDto> grid = new Grid<>(ColorDto.class);
@@ -78,8 +87,14 @@ public class ColorsGui extends VerticalLayout {
 
     public Icon getRemoveIcon(String id) {
         Icon removeIcon = new Icon(VaadinIcon.MINUS_CIRCLE);
-        removeIcon.setColor("red");
+        String mouseOutColor = "#c70000";
+        removeIcon.setColor(mouseOutColor);
         removeIcon.addClickListener(it -> removePopupCreate(id));
+
+        removeIcon.getElement().getStyle().set("vertical-align", "right");
+        removeIcon.getElement().addEventListener("mouseover", it -> removeIcon.setColor("#ff0303"));
+        removeIcon.getElement().addEventListener("mouseout", it -> removeIcon.setColor(mouseOutColor));
+
         return removeIcon;
     }
 
@@ -89,18 +104,17 @@ public class ColorsGui extends VerticalLayout {
         Text description = new Text("Are you sure you want to delete the color?");
         dialog.add(new Div(description));
 
+        Notification notification = new Notification("Deleted", 3000);
+
         Button confirmButton = new Button("Confirm", event -> {
             colorService.deleteColor(id);
+            notification.open();
             dialog.close();
             getColorsGrid();
         });
 
         Shortcuts.addShortcutListener(dialog, confirmButton::click, Key.ENTER);
-
-        Button cancelButton = new Button("Cancel", event -> {
-            dialog.close();
-        });
-
+        Button cancelButton = new Button("Cancel", event -> dialog.close());
         dialog.add(new Div(confirmButton, cancelButton));
     }
 
@@ -111,6 +125,8 @@ public class ColorsGui extends VerticalLayout {
         Text description = new Text("Enter the name of the color you want to create.");
         dialog.add(new Div(description));
 
+        Notification notification = new Notification("Created", 3000);
+
         TextField textField = new TextField();
         textField.setPlaceholder("Name");
         dialog.add(new Div(textField));
@@ -118,17 +134,14 @@ public class ColorsGui extends VerticalLayout {
         Button confirmButton = new Button("Confirm", event -> {
             if (!textField.getValue().equals("")) {
                 colorService.createColor(new Color(textField.getValue()));
+                notification.open();
                 dialog.close();
                 getColorsGrid();
             }
         });
 
         Shortcuts.addShortcutListener(dialog, confirmButton::click, Key.ENTER);
-
-        Button cancelButton = new Button("Cancel", event -> {
-            dialog.close();
-        });
-
+        Button cancelButton = new Button("Cancel", event -> dialog.close());
         dialog.add(new Div(confirmButton, cancelButton));
     }
 

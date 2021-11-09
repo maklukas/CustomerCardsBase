@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Service("customerService")
 public class CustomerService {
 
-    private Logger LOGGER = LoggerFactory.getLogger(CustomerService.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(CustomerService.class);
     private final CustomerRepo repo;
     private final LashesService lashesService;
     private final ContactService contactService;

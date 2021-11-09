@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class ContactService {
 
     private final ContactRepo repo;
-    private static Logger LOGGER = LoggerFactory.getLogger(ContactService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ContactService.class);
 
     @Autowired
     public ContactService(ContactRepo repo) {
@@ -31,6 +31,7 @@ public class ContactService {
 
     public Contact getContactById(@Nullable String id) {
         LOGGER.info("Contact fetched by id.");
+        assert id != null;
         return repo.findById(id).orElse(new Contact());
     }
 

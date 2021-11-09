@@ -17,21 +17,19 @@ import java.util.stream.Collectors;
 @Service("lashesService")
 public class LashesService {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(LashesService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LashesService.class);
     private final LashesRepo repo;
     private final MethodService methodService;
     private final StyleService styleService;
     private final ColorService colorService;
 
+    @Autowired
     public LashesService(LashesRepo repo, MethodService methodService, StyleService styleService, ColorService colorService) {
         this.repo = repo;
         this.methodService = methodService;
         this.styleService = styleService;
         this.colorService = colorService;
     }
-
-    @Autowired
-
 
     public List<Lashes> getAllLashes() {
         LOGGER.info("All Lashes fetched.");
@@ -40,6 +38,7 @@ public class LashesService {
 
     public Lashes getLashesById(@Nullable String id) {
         LOGGER.info("Lashes fetched by id.");
+        assert id != null;
         return repo.findById(id).orElse(new Lashes());
     }
 
@@ -104,13 +103,13 @@ public class LashesService {
     public boolean partialUpdate(Lashes lashes, Map<String, Object> updates) {
         LOGGER.info("Lashes particular updated.");
         if (updates.containsKey("style")) {
-            lashes.setStyle((Style) updates.get("style"));
+            lashes.setStyle((String) updates.get("style"));
         }
         if (updates.containsKey("method")) {
-            lashes.setMethod((Method) updates.get("method"));
+            lashes.setMethod((String) updates.get("method"));
         }
         if (updates.containsKey("color")) {
-            lashes.setColor((Color) updates.get("color"));
+            lashes.setColor((String) updates.get("color"));
         }
         if (updates.containsKey("comment")) {
             lashes.setComment((String) updates.get("comment"));
@@ -133,26 +132,20 @@ public class LashesService {
     }
 
     private void getColorClass(Lashes lashes) {
-        if (colorService.validateIfExists(lashes.getColor())) {
-            lashes.setColor(colorService.findFirstByName(lashes.getColor().getName()));
-        } else {
-            lashes.setColor(colorService.createColor(lashes.getColor()));
+        if (!colorService.validateIfExists(new Color(lashes.getColor()))) {
+            colorService.createColor(new Color(lashes.getColor()));
         }
     }
 
     private void getStyleClass(Lashes lashes) {
-        if (styleService.validateIfExists(lashes.getStyle())) {
-            lashes.setStyle(styleService.findFirstByName(lashes.getStyle().getName()));
-        } else {
-            lashes.setStyle(styleService.createStyle(lashes.getStyle()));
+        if (!styleService.validateIfExists(new Style(lashes.getStyle()))) {
+            styleService.createStyle(new Style(lashes.getStyle()));
         }
     }
 
     private void getMethodClass(Lashes lashes) {
-        if (methodService.validateIfExists(lashes.getMethod())) {
-            lashes.setMethod(methodService.findFirstByName(lashes.getMethod().getName()));
-        } else {
-            lashes.setMethod(methodService.createMethod(lashes.getMethod()));
+        if (!methodService.validateIfExists(new Method(lashes.getMethod()))) {
+            methodService.createMethod(new Method(lashes.getMethod()));
         }
     }
 

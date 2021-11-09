@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class StyleService {
 
     private final StyleRepo repo;
-    private static Logger LOGGER = LoggerFactory.getLogger(StyleService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StyleService.class);
 
     @Autowired
     public StyleService(StyleRepo repo) {
@@ -31,6 +31,7 @@ public class StyleService {
 
     public Style getStyleById(@Nullable String id) {
         LOGGER.info("Style fetched by id.");
+        assert id != null;
         return repo.findById(id).orElse(new Style(""));
     }
 

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class ColorService {
 
     private final ColorRepo repo;
-    private static Logger LOGGER = LoggerFactory.getLogger(ColorService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ColorService.class);
 
     @Autowired
     public ColorService(ColorRepo repo) {
@@ -31,6 +31,7 @@ public class ColorService {
 
     public Color getColorById(@Nullable String id) {
         LOGGER.info("Color fetched by id.");
+        assert id != null;
         return repo.findById(id).orElse(new Color(""));
     }
 

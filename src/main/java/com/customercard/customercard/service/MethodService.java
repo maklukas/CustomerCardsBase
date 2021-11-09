@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class MethodService {
 
     private final MethodRepo repo;
-    private static Logger LOGGER = LoggerFactory.getLogger(MethodService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodService.class);
 
     @Autowired
     public MethodService(MethodRepo repo) {
@@ -31,6 +31,7 @@ public class MethodService {
 
     public Method getMethodById(@Nullable String id) {
         LOGGER.info("Method fetched by id.");
+        assert id != null;
         return repo.findById(id).orElse(new Method(""));
     }
 
