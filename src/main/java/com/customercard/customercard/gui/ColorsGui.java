@@ -104,11 +104,11 @@ public class ColorsGui extends VerticalLayout {
         Text description = new Text("Are you sure you want to delete the color?");
         dialog.add(new Div(description));
 
-        Notification notification = new Notification("Deleted", 3000);
+        Notification deletedNote = new Notification("Deleted", 3000);
 
         Button confirmButton = new Button("Confirm", event -> {
             colorService.deleteColor(id);
-            notification.open();
+            deletedNote.open();
             dialog.close();
             getColorsGrid();
         });
@@ -125,7 +125,7 @@ public class ColorsGui extends VerticalLayout {
         Text description = new Text("Enter the name of the color you want to create.");
         dialog.add(new Div(description));
 
-        Notification notification = new Notification("Created", 3000);
+        Notification createdNote = new Notification("Created", 3000);
 
         TextField textField = new TextField();
         textField.setPlaceholder("Name");
@@ -134,7 +134,7 @@ public class ColorsGui extends VerticalLayout {
         Button confirmButton = new Button("Confirm", event -> {
             if (!textField.getValue().equals("")) {
                 colorService.createColor(new Color(textField.getValue()));
-                notification.open();
+                createdNote.open();
                 dialog.close();
                 getColorsGrid();
             }
