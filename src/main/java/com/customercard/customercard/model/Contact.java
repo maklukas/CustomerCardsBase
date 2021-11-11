@@ -14,11 +14,8 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Contact {
+public class Contact extends AbstractEntity {
 
-    @Id
-    @NotNull
-    private String id;
     private String phoneNumber;
     @Email
     private String emailAddress;

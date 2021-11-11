@@ -13,10 +13,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Color {
+public class Color extends AbstractEntity implements Dictionary {
 
-    @Id
-    private String id;
     @Indexed(unique = true)
     private String name;
 

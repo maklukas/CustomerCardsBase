@@ -3,6 +3,7 @@ package com.customercard.customercard.service;
 import com.customercard.customercard.model.Color;
 import com.customercard.customercard.repository.ColorRepo;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +30,12 @@ public class ColorService {
         return repo.findAll();
     }
 
-    public Color getColorById(@Nullable String id) {
+    public Color getColorById(@NotNull String id) {
         LOGGER.info("Color fetched by id.");
-        assert id != null;
         return repo.findById(id).orElse(new Color(""));
     }
 
-    public List<Color> getColorByName(@Nullable String txt) {
+    public List<Color> getColorByName(@NotNull String txt) {
         LOGGER.info("All fetched by name.");
         return repo.findAll()
                 .stream()

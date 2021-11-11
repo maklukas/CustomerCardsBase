@@ -14,10 +14,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Style {
-    @Id
-    @NotNull
-    private String id;
+public class Style extends AbstractEntity implements Dictionary {
+
     @Indexed(unique = true)
     private String name;
 

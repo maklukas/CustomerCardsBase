@@ -15,10 +15,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Method {
-    @Id
-    @NotNull
-    private String id;
+public class Method extends AbstractEntity implements Dictionary {
+
     @Indexed(unique = true)
     private String name;
 

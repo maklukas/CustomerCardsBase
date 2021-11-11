@@ -16,10 +16,8 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Lashes {
-    @Id
-    @NotNull
-    private String id;
+public class Lashes extends AbstractEntity {
+
     private String style;
     private String method;
     private String color;
