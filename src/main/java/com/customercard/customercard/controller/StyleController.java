@@ -30,27 +30,27 @@ public class StyleController {
     public List<StyleDto> getStyle(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.mapModelListToDtoList(styleService.getStyles(id, txt));
+        return mapper.mapModelListToDtoList(styleService.getAll(id, txt));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createStyle(@RequestBody StyleDto style) {
-        styleService.createStyle(mapper.mapDtoToModel(style));
+        styleService.create(mapper.mapDtoToModel(style));
     }
 
     @DeleteMapping("/{id}")
     public void deleteStyle(@PathVariable String id) {
-        styleService.deleteStyle(id);
+        styleService.delete(id);
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateStyle(@RequestBody StyleDto style) {
-        styleService.updateStyle(mapper.mapDtoToModel(style));
+        styleService.update(mapper.mapDtoToModel(style));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void partialUpdate(@RequestParam String id, @RequestBody Map<String, Object> updates) {
-        Style style = styleService.getStyleById(id);
+        Style style = styleService.getById(id);
         styleService.partialUpdate(style, updates);
     }
 }

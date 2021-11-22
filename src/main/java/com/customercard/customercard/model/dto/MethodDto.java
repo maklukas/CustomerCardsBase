@@ -5,10 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class MethodDto implements Dictionary {
-    private String id;
-    private String name;
+
+public class MethodDto extends Dictionary {
+    public MethodDto() {
+    }
+
+    public MethodDto(String name) {
+        super(name);
+    }
 }

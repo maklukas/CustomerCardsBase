@@ -1,8 +1,10 @@
 package com.customercard.customercard.service;
 
 import com.customercard.customercard.model.Style;
+import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.repository.StyleRepo;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service("styleService")
-public class StyleService {
+public class StyleService implements DictionaryService {
 
     private final StyleRepo repo;
     private static final Logger LOGGER = LoggerFactory.getLogger(StyleService.class);
@@ -24,18 +26,20 @@ public class StyleService {
         this.repo = repo;
     }
 
-    public List<Style> getAllStyles() {
-        LOGGER.info("All Styles fetched.");
+    @Override
+    public List<Style> getAll() {
+        LOGGER.info("All styles fetched.");
         return repo.findAll();
     }
 
-    public Style getStyleById(@Nullable String id) {
+    @Override
+    public Style getById(@NotNull String id) {
         LOGGER.info("Style fetched by id.");
-        assert id != null;
         return repo.findById(id).orElse(new Style(""));
     }
 
-    public List<Style> getStyleByName(@Nullable String txt) {
+    @Override
+    public List<Style> getByName(@NotNull String txt) {
         LOGGER.info("All fetched by name.");
         return repo.findAll()
                 .stream()
@@ -43,52 +47,58 @@ public class StyleService {
                 .collect(Collectors.toList());
     }
 
-    public List<Style> getStyles(@Nullable String id, @Nullable String txt) {
+    @Override
+    public List<Style> getAll(@Nullable String id, @Nullable String txt) {
         if (id != null) {
-            return List.of(getStyleById(id));
+            return List.of(getById(id));
         } else if (txt != null) {
-            return getStyleByName(txt);
+            return getByName(txt);
         } else {
-            return getAllStyles();
+            return getAll();
         }
     }
 
-    public Style createStyle(Style style) {
+    @Override
+    public Dictionary create(Dictionary style) {
 
         if (validateIfExists(style)) {
             return findFirstByName(style.getName());
         }
 
         LOGGER.info("Style created.");
-        return repo.save(style);
+        return repo.save((Style) style);
+
     }
 
-    public Style updateStyle(Style style) {
+    @Override
+    public Dictionary update(Dictionary style) {
 
         if (validateIfExists(style)) {
             return findFirstByName(style.getName());
         }
-
         LOGGER.info("Style updated.");
-        return repo.save(style);
+        return repo.save((Style) style);
     }
 
-    public boolean deleteStyle(String id) {
+    @Override
+    public boolean delete(String id) {
         LOGGER.info("Style deleted.");
         repo.deleteById(id);
         return true;
     }
 
-    public boolean partialUpdate(Style style, Map<String, Object> updates) {
+    @Override
+    public boolean partialUpdate(Dictionary style, Map<String, Object> updates) {
         LOGGER.info("Style particular updated.");
         if (updates.containsKey("name")) {
             style.setName((String) updates.get("name"));
         }
-        updateStyle(style);
+        update(style);
         return true;
     }
 
-    public boolean validateIfExists(Style style) {
+    @Override
+    public boolean validateIfExists(Dictionary style) {
         if (repo.findByName(style.getName()).size() > 0) {
             LOGGER.info("Style already exists.");
             return true;
@@ -96,6 +106,7 @@ public class StyleService {
         return false;
     }
 
+    @Override
     public Style findFirstByName(String name) {
         return repo
                 .findByName(name)
@@ -103,4 +114,5 @@ public class StyleService {
                 .findFirst()
                 .orElseThrow();
     }
+
 }

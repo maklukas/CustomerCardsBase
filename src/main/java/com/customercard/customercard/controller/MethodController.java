@@ -30,27 +30,27 @@ public class MethodController {
     public List<MethodDto> getMethod(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.mapModelListToDtoList(methodService.getMethods(id, txt));
+        return mapper.mapModelListToDtoList(methodService.getAll(id, txt));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createMethod(@RequestBody MethodDto method) {
-        methodService.createMethod(mapper.mapDtoToModel(method));
+        methodService.create(mapper.mapDtoToModel(method));
     }
 
     @DeleteMapping("/{id}")
     public void deleteMethod(@PathVariable String id) {
-        methodService.deleteMethod(id);
+        methodService.delete(id);
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateMethod(@RequestBody MethodDto method) {
-        methodService.updateMethod(mapper.mapDtoToModel(method));
+        methodService.update(mapper.mapDtoToModel(method));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void partialUpdate(@RequestParam String id, @RequestBody Map<String, Object> updates) {
-        Method method = methodService.getMethodById(id);
+        Method method = methodService.getById(id);
         methodService.partialUpdate(method, updates);
     }
 }

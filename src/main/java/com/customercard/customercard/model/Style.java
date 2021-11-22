@@ -11,28 +11,12 @@ import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Document("styles")
-@Getter
-@Setter
-@NoArgsConstructor
-public class Style extends AbstractEntity implements Dictionary {
-
-    @Indexed(unique = true)
-    private String name;
+public class Style extends Dictionary {
 
     public Style(String name) {
-        this.name = name;
+        super(name);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Style style = (Style) o;
-        return Objects.equals(name, style.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name);
+    public Style() {
     }
 }

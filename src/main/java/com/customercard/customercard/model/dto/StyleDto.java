@@ -5,10 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class StyleDto implements Dictionary {
-    private String id;
-    private String name;
+public class StyleDto extends Dictionary {
+    public StyleDto(String name) {
+        super(name);
+    }
+
+    public StyleDto() {
+    }
 }

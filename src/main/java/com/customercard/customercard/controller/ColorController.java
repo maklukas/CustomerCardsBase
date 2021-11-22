@@ -30,27 +30,27 @@ public class ColorController {
     public List<ColorDto> getColor(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.mapModelListToDtoList(colorService.getColors(id, txt));
+        return mapper.mapModelListToDtoList(colorService.getAll(id, txt));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createColor(@RequestBody ColorDto color) {
-        colorService.createColor(mapper.mapDtoToModel(color));
+        colorService.create(mapper.mapDtoToModel(color));
     }
 
     @DeleteMapping("/{id}")
     public void deleteColor(@PathVariable String id) {
-        colorService.deleteColor(id);
+        colorService.delete(id);
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateColor(@RequestBody ColorDto color) {
-        colorService.updateColor(mapper.mapDtoToModel(color));
+        colorService.update(mapper.mapDtoToModel(color));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void partialUpdate(@RequestParam String id, @RequestBody Map<String, Object> updates) {
-        Color color = colorService.getColorById(id);
+        Color color = colorService.getById(id);
         colorService.partialUpdate(color, updates);
     }
 }

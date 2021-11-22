@@ -1,6 +1,7 @@
 package com.customercard.customercard.service;
 
 import com.customercard.customercard.model.Color;
+import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.repository.ColorRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service("colorService")
-public class ColorService {
+public class ColorService implements DictionaryService {
 
     private final ColorRepo repo;
     private static final Logger LOGGER = LoggerFactory.getLogger(ColorService.class);
@@ -25,17 +26,20 @@ public class ColorService {
         this.repo = repo;
     }
 
-    public List<Color> getAllColors() {
+    @Override
+    public List<Color> getAll() {
         LOGGER.info("All colors fetched.");
         return repo.findAll();
     }
 
-    public Color getColorById(@NotNull String id) {
+    @Override
+    public Color getById(@NotNull String id) {
         LOGGER.info("Color fetched by id.");
         return repo.findById(id).orElse(new Color(""));
     }
 
-    public List<Color> getColorByName(@NotNull String txt) {
+    @Override
+    public List<Color> getByName(@NotNull String txt) {
         LOGGER.info("All fetched by name.");
         return repo.findAll()
                 .stream()
@@ -43,52 +47,58 @@ public class ColorService {
                 .collect(Collectors.toList());
     }
 
-    public List<Color> getColors(@Nullable String id, @Nullable String txt) {
+    @Override
+    public List<Color> getAll(@Nullable String id, @Nullable String txt) {
         if (id != null) {
-            return List.of(getColorById(id));
+            return List.of(getById(id));
         } else if (txt != null) {
-            return getColorByName(txt);
+            return getByName(txt);
         } else {
-            return getAllColors();
+            return getAll();
         }
     }
 
-    public Color createColor(Color color) {
+    @Override
+    public Dictionary create(Dictionary color) {
 
         if (validateIfExists(color)) {
             return findFirstByName(color.getName());
         }
 
         LOGGER.info("Color created.");
-        return repo.save(color);
+        return repo.save((Color) color);
 
     }
 
-    public Color updateColor(Color color) {
+    @Override
+    public Dictionary update(Dictionary color) {
 
         if (validateIfExists(color)) {
             return findFirstByName(color.getName());
         }
         LOGGER.info("Color updated.");
-        return repo.save(color);
+        return repo.save((Color) color);
     }
 
-    public boolean deleteColor(String id) {
+    @Override
+    public boolean delete(String id) {
         LOGGER.info("Color deleted.");
         repo.deleteById(id);
         return true;
     }
 
-    public boolean partialUpdate(Color color, Map<String, Object> updates) {
+    @Override
+    public boolean partialUpdate(Dictionary color, Map<String, Object> updates) {
         LOGGER.info("Color particular updated.");
         if (updates.containsKey("name")) {
             color.setName((String) updates.get("name"));
         }
-        updateColor(color);
+        update(color);
         return true;
     }
 
-    public boolean validateIfExists(Color color) {
+    @Override
+    public boolean validateIfExists(Dictionary color) {
         if (repo.findByName(color.getName()).size() > 0) {
             LOGGER.info("Color already exists.");
             return true;
@@ -96,6 +106,7 @@ public class ColorService {
         return false;
     }
 
+    @Override
     public Color findFirstByName(String name) {
         return repo
                 .findByName(name)
@@ -103,4 +114,5 @@ public class ColorService {
                 .findFirst()
                 .orElseThrow();
     }
+
 }

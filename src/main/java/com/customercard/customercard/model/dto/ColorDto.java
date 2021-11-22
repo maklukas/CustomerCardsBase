@@ -5,10 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class ColorDto implements Dictionary {
-    private String id;
-    private String name;
+public class ColorDto extends Dictionary {
+
+    public ColorDto(String name) {
+        super(name);
+    }
+
+    public ColorDto() {
+    }
 }

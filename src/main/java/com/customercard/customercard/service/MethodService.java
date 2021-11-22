@@ -1,8 +1,10 @@
 package com.customercard.customercard.service;
 
 import com.customercard.customercard.model.Method;
+import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.repository.MethodRepo;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service("methodService")
-public class MethodService {
+public class MethodService implements DictionaryService {
 
     private final MethodRepo repo;
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodService.class);
@@ -24,18 +26,20 @@ public class MethodService {
         this.repo = repo;
     }
 
-    public List<Method> getAllMethods() {
-        LOGGER.info("All Methods fetched.");
+    @Override
+    public List<Method> getAll() {
+        LOGGER.info("All methods fetched.");
         return repo.findAll();
     }
 
-    public Method getMethodById(@Nullable String id) {
+    @Override
+    public Method getById(@NotNull String id) {
         LOGGER.info("Method fetched by id.");
-        assert id != null;
         return repo.findById(id).orElse(new Method(""));
     }
 
-    public List<Method> getMethodByName(@Nullable String txt) {
+    @Override
+    public List<Method> getByName(@NotNull String txt) {
         LOGGER.info("All fetched by name.");
         return repo.findAll()
                 .stream()
@@ -43,52 +47,58 @@ public class MethodService {
                 .collect(Collectors.toList());
     }
 
-    public List<Method> getMethods(@Nullable String id, @Nullable String txt) {
+    @Override
+    public List<Method> getAll(@Nullable String id, @Nullable String txt) {
         if (id != null) {
-            return List.of(getMethodById(id));
+            return List.of(getById(id));
         } else if (txt != null) {
-            return getMethodByName(txt);
+            return getByName(txt);
         } else {
-            return getAllMethods();
+            return getAll();
         }
     }
 
-    public Method createMethod(Method method) {
+    @Override
+    public Dictionary create(Dictionary method) {
 
         if (validateIfExists(method)) {
             return findFirstByName(method.getName());
         }
 
         LOGGER.info("Method created.");
-        return repo.save(method);
+        return repo.save((Method) method);
+
     }
 
-    public Method updateMethod(Method method) {
+    @Override
+    public Dictionary update(Dictionary method) {
 
         if (validateIfExists(method)) {
             return findFirstByName(method.getName());
         }
-
         LOGGER.info("Method updated.");
-        return repo.save(method);
+        return repo.save((Method) method);
     }
 
-    public boolean deleteMethod(String id) {
+    @Override
+    public boolean delete(String id) {
         LOGGER.info("Method deleted.");
         repo.deleteById(id);
         return true;
     }
 
-    public boolean partialUpdate(Method method, Map<String, Object> updates) {
+    @Override
+    public boolean partialUpdate(Dictionary method, Map<String, Object> updates) {
         LOGGER.info("Method particular updated.");
         if (updates.containsKey("name")) {
             method.setName((String) updates.get("name"));
         }
-        updateMethod(method);
+        update(method);
         return true;
     }
 
-    public boolean validateIfExists(Method method) {
+    @Override
+    public boolean validateIfExists(Dictionary method) {
         if (repo.findByName(method.getName()).size() > 0) {
             LOGGER.info("Method already exists.");
             return true;
@@ -96,6 +106,7 @@ public class MethodService {
         return false;
     }
 
+    @Override
     public Method findFirstByName(String name) {
         return repo
                 .findByName(name)
@@ -103,4 +114,5 @@ public class MethodService {
                 .findFirst()
                 .orElseThrow();
     }
+
 }

@@ -66,7 +66,7 @@ public class ColorsView extends VerticalLayout {
 
     private Grid<ColorDto> getColorsGrid() {
         Grid<ColorDto> grid = new Grid<>(ColorDto.class);
-        grid.setItems(colorMapper.mapModelListToDtoList(colorService.getColors(null, findValue)));
+        grid.setItems(colorMapper.mapModelListToDtoList(colorService.getAll(null, findValue)));
 
         grid.removeColumnByKey("id");
         grid.setColumns("name");
@@ -104,7 +104,7 @@ public class ColorsView extends VerticalLayout {
         Notification deletedNote = new Notification("Deleted", 3000);
 
         Button confirmButton = new Button("Confirm", event -> {
-            colorService.deleteColor(id);
+            colorService.delete(id);
             deletedNote.open();
             dialog.close();
             getColorsGrid();
@@ -130,7 +130,7 @@ public class ColorsView extends VerticalLayout {
 
         Button confirmButton = new Button("Confirm", event -> {
             if (!textField.getValue().equals("")) {
-                colorService.createColor(new Color(textField.getValue()));
+                colorService.create(new Color(textField.getValue()));
                 createdNote.open();
                 dialog.close();
                 getColorsGrid();

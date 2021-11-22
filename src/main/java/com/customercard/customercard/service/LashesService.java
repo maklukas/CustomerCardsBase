@@ -133,19 +133,19 @@ public class LashesService {
 
     private void getColorClass(Lashes lashes) {
         if (!colorService.validateIfExists(new Color(lashes.getColor()))) {
-            colorService.createColor(new Color(lashes.getColor()));
+            colorService.create(new Color(lashes.getColor()));
         }
     }
 
     private void getStyleClass(Lashes lashes) {
         if (!styleService.validateIfExists(new Style(lashes.getStyle()))) {
-            styleService.createStyle(new Style(lashes.getStyle()));
+            styleService.create(new Style(lashes.getStyle()));
         }
     }
 
     private void getMethodClass(Lashes lashes) {
         if (!methodService.validateIfExists(new Method(lashes.getMethod()))) {
-            methodService.createMethod(new Method(lashes.getMethod()));
+            methodService.create(new Method(lashes.getMethod()));
         }
     }
 
