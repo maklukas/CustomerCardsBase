@@ -1,7 +1,7 @@
 package com.customercard.customercard.view;
 
-import com.customercard.customercard.mapper.ColorMapper;
 import com.customercard.customercard.model.Color;
+import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.model.dto.ColorDto;
 import com.customercard.customercard.service.ColorService;
 import com.vaadin.flow.component.*;
@@ -17,18 +17,23 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
+
+import java.util.Collection;
+import java.util.List;
 
 @Route(value = "/colors", layout = MainLayout.class)
 @PageTitle("Colors | Lashes")
 public class ColorsView extends VerticalLayout {
     private final ColorService colorService;
-    private final ColorMapper colorMapper;
+    private final ModelMapper mapper;
     private String findValue;
     private Grid<ColorDto> theGrid;
 
-    public ColorsView(ColorService colorService, ColorMapper colorMapper) {
+    public ColorsView(ColorService colorService, ModelMapper mapper) {
         this.colorService = colorService;
-        this.colorMapper = colorMapper;
+        this.mapper = mapper;
         add(getFindTextFieldComponent(), plusIconComponent());
         add(getColorsGrid());
     }
@@ -66,7 +71,9 @@ public class ColorsView extends VerticalLayout {
 
     private Grid<ColorDto> getColorsGrid() {
         Grid<ColorDto> grid = new Grid<>(ColorDto.class);
-        grid.setItems(colorMapper.mapModelListToDtoList(colorService.getAll(null, findValue)));
+        List<ColorDto> colors = mapper.map(colorService.getAll(null, findValue), new TypeToken<List<ColorDto>>() {
+        }.getType());
+        grid.setItems(colors);
 
         grid.removeColumnByKey("id");
         grid.setColumns("name");

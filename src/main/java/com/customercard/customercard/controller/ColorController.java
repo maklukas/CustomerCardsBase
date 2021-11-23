@@ -1,10 +1,11 @@
 package com.customercard.customercard.controller;
 
 
-import com.customercard.customercard.mapper.ColorMapper;
 import com.customercard.customercard.model.Color;
 import com.customercard.customercard.model.dto.ColorDto;
 import com.customercard.customercard.service.ColorService;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,10 @@ import java.util.Map;
 public class ColorController {
 
     private final ColorService colorService;
-    private final ColorMapper mapper;
+    private ModelMapper mapper;
 
     @Autowired
-    public ColorController(ColorService colorService, ColorMapper mapper) {
+    public ColorController(ColorService colorService, ModelMapper mapper) {
         this.colorService = colorService;
         this.mapper = mapper;
     }
@@ -30,12 +31,12 @@ public class ColorController {
     public List<ColorDto> getColor(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.mapModelListToDtoList(colorService.getAll(id, txt));
+        return mapper.map(colorService.getAll(id, txt), new TypeToken<List<ColorDto>>() {}.getType());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createColor(@RequestBody ColorDto color) {
-        colorService.create(mapper.mapDtoToModel(color));
+        colorService.create(mapper.map(color, Color.class));
     }
 
     @DeleteMapping("/{id}")
@@ -45,7 +46,7 @@ public class ColorController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateColor(@RequestBody ColorDto color) {
-        colorService.update(mapper.mapDtoToModel(color));
+        colorService.update(mapper.map(color, Color.class));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)

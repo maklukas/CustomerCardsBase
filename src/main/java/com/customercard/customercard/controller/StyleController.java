@@ -1,10 +1,11 @@
 package com.customercard.customercard.controller;
 
 
-import com.customercard.customercard.mapper.StyleMapper;
 import com.customercard.customercard.model.Style;
 import com.customercard.customercard.model.dto.StyleDto;
 import com.customercard.customercard.service.StyleService;
+import com.googlecode.gentyref.TypeToken;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,10 @@ import java.util.Map;
 public class StyleController {
 
     private final StyleService styleService;
-    private final StyleMapper mapper;
+    private final ModelMapper mapper;
 
     @Autowired
-    public StyleController(StyleService styleService, StyleMapper mapper) {
+    public StyleController(StyleService styleService, ModelMapper mapper) {
         this.styleService = styleService;
         this.mapper = mapper;
     }
@@ -30,12 +31,12 @@ public class StyleController {
     public List<StyleDto> getStyle(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.mapModelListToDtoList(styleService.getAll(id, txt));
+        return mapper.map(styleService.getAll(id, txt), new TypeToken<List<StyleDto>>() {}.getType());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createStyle(@RequestBody StyleDto style) {
-        styleService.create(mapper.mapDtoToModel(style));
+        styleService.create(mapper.map(style, Style.class));
     }
 
     @DeleteMapping("/{id}")
@@ -45,7 +46,7 @@ public class StyleController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateStyle(@RequestBody StyleDto style) {
-        styleService.update(mapper.mapDtoToModel(style));
+        styleService.update(mapper.map(style, Style.class));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)

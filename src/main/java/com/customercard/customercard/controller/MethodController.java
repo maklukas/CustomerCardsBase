@@ -1,10 +1,11 @@
 package com.customercard.customercard.controller;
 
 
-import com.customercard.customercard.mapper.MethodMapper;
 import com.customercard.customercard.model.Method;
 import com.customercard.customercard.model.dto.MethodDto;
 import com.customercard.customercard.service.MethodService;
+import com.googlecode.gentyref.TypeToken;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,10 @@ import java.util.Map;
 public class MethodController {
 
     private final MethodService methodService;
-    private final MethodMapper mapper;
+    private final ModelMapper mapper;
 
     @Autowired
-    public MethodController(MethodService methodService, MethodMapper mapper) {
+    public MethodController(MethodService methodService, ModelMapper mapper) {
         this.methodService = methodService;
         this.mapper = mapper;
     }
@@ -30,12 +31,12 @@ public class MethodController {
     public List<MethodDto> getMethod(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.mapModelListToDtoList(methodService.getAll(id, txt));
+        return mapper.map(methodService.getAll(id, txt), new TypeToken<List<MethodDto>>() {}.getType());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createMethod(@RequestBody MethodDto method) {
-        methodService.create(mapper.mapDtoToModel(method));
+        methodService.create(mapper.map(method, Method.class));
     }
 
     @DeleteMapping("/{id}")
@@ -45,7 +46,7 @@ public class MethodController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateMethod(@RequestBody MethodDto method) {
-        methodService.update(mapper.mapDtoToModel(method));
+        methodService.update(mapper.map(method, Method.class));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)

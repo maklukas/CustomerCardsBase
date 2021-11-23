@@ -1,10 +1,11 @@
 package com.customercard.customercard.controller;
 
 
-import com.customercard.customercard.mapper.ContactMapper;
 import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.dto.ContactDto;
 import com.customercard.customercard.service.ContactService;
+import com.googlecode.gentyref.TypeToken;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,10 @@ import java.util.Map;
 public class ContactController {
 
     private final ContactService contactService;
-    private final ContactMapper mapper;
+    private final ModelMapper mapper;
 
     @Autowired
-    public ContactController(ContactService contactService, ContactMapper mapper) {
+    public ContactController(ContactService contactService, ModelMapper mapper) {
         this.contactService = contactService;
         this.mapper = mapper;
     }
@@ -30,12 +31,13 @@ public class ContactController {
     public List<ContactDto> getContact(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.mapModelListToDtoList(contactService.getContacts(id, txt));
+        return mapper.map(contactService.getContacts(id, txt), new TypeToken<List<ContactDto>>() {
+        }.getType());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createContact(@RequestBody ContactDto contact) {
-        contactService.createContact(mapper.mapDtoToModel(contact));
+        contactService.createContact(mapper.map(contact, Contact.class));
     }
 
     @DeleteMapping("/{id}")
@@ -45,7 +47,7 @@ public class ContactController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateContact(@RequestBody ContactDto contact) {
-        contactService.updateContact(mapper.mapDtoToModel(contact));
+        contactService.updateContact(mapper.map(contact, Contact.class));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)

@@ -1,10 +1,11 @@
 package com.customercard.customercard.controller;
 
 
-import com.customercard.customercard.mapper.LashesMapper;
 import com.customercard.customercard.model.Lashes;
 import com.customercard.customercard.model.dto.LashesDto;
 import com.customercard.customercard.service.LashesService;
+import com.googlecode.gentyref.TypeToken;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +19,10 @@ import java.util.Map;
 public class LashesController {
 
     private final LashesService lashesService;
-    private final LashesMapper mapper;
+    private final ModelMapper mapper;
 
     @Autowired
-    public LashesController(LashesService lashesService, LashesMapper mapper) {
+    public LashesController(LashesService lashesService, ModelMapper mapper) {
         this.lashesService = lashesService;
         this.mapper = mapper;
     }
@@ -30,12 +31,13 @@ public class LashesController {
     public List<LashesDto> getLashes(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.mapModelListToDtoList(lashesService.getLashes(id, txt));
+        return mapper.map(lashesService.getLashes(id, txt), new TypeToken<List<LashesDto>>() {
+        }.getType());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createLashes(@RequestBody LashesDto lashes) {
-        lashesService.createLashes(mapper.mapDtoToModel(lashes));
+        lashesService.createLashes(mapper.map(lashes, Lashes.class));
     }
 
     @DeleteMapping("/{id}")
@@ -45,7 +47,7 @@ public class LashesController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateLashes(@RequestBody LashesDto lashes) {
-        lashesService.updateLashes(mapper.mapDtoToModel(lashes));
+        lashesService.updateLashes(mapper.map(lashes, Lashes.class));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
