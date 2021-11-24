@@ -1,8 +1,6 @@
 package com.customercard.customercard.view;
 
-import com.customercard.customercard.model.Color;
 import com.customercard.customercard.model.Dictionary;
-import com.customercard.customercard.model.dto.ColorDto;
 import com.customercard.customercard.service.DictionaryService;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
@@ -132,7 +130,7 @@ public abstract class DictionaryView extends VerticalLayout {
 
         Button confirmButton = new Button("Confirm", event -> {
             if (!textField.getValue().equals("")) {
-                service.create(new Color(textField.getValue()));
+                service.create(getObject(textField.getValue()));
                 createdNote.open();
                 dialog.close();
                 getTheGrid();
@@ -144,4 +142,6 @@ public abstract class DictionaryView extends VerticalLayout {
         dialog.add(new Div(confirmButton, cancelButton));
     }
 
+        public abstract Dictionary getObject(String name);
 }
+

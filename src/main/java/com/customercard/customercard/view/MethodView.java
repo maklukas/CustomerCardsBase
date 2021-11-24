@@ -1,21 +1,21 @@
 package com.customercard.customercard.view;
 
-import com.customercard.customercard.model.Color;
 import com.customercard.customercard.model.Dictionary;
-import com.customercard.customercard.service.ColorService;
+import com.customercard.customercard.model.Method;
+import com.customercard.customercard.service.MethodService;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Route(value = "/colors", layout = MainLayout.class)
-@PageTitle("Colors | Lashes")
-public class ColorsView extends DictionaryView {
-    private final ColorService service;
+@Route(value = "/methods", layout = MainLayout.class)
+@PageTitle("Methods | Lashes")
+public class MethodView extends DictionaryView {
+    private final MethodService service;
     private final ModelMapper mapper;
 
     @Autowired
-    public ColorsView(ColorService service, ModelMapper mapper) {
+    public MethodView(MethodService service, ModelMapper mapper) {
         super(service, mapper);
         this.service = service;
         this.mapper = mapper;
@@ -23,6 +23,6 @@ public class ColorsView extends DictionaryView {
 
     @Override
     public Dictionary getObject(String name) {
-        return new Color(name);
+        return new Method(name);
     }
 }

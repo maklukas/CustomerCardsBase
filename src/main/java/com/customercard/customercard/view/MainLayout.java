@@ -18,7 +18,7 @@ public class MainLayout extends AppLayout {
     }
 
     private void createHeader() {
-        H1 logo = new H1("Vaadin CRM");
+        H1 logo = new H1("Customer Cards");
         logo.addClassNames("text-l", "m-m");
 
         Button logout = new Button("Log out");
@@ -40,7 +40,9 @@ public class MainLayout extends AppLayout {
 
         addToDrawer(new VerticalLayout(
             listLink,
-            new RouterLink("Colors", ColorsView.class)
+            new RouterLink("Colors", ColorsView.class),
+            new RouterLink("Styles", StyleView.class),
+            new RouterLink("Methods", MethodView.class)
         ));
     }
 }
