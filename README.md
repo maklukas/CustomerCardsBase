@@ -1,7 +1,7 @@
 # CustomerCardsBase
 API to store customer informations.
 
-To use you have to create application.properties files and provide MongoDB connection.
+To use you have to create application.properties file and provide MongoDB connection data.
 
 Required data:
 ```YAML
@@ -13,3 +13,5 @@ db.database=<clusterAddress>
 spring.data.mongodb.database=<baseName>
 
 ```
+
+To access API documentation go to /swagger-ui.html
