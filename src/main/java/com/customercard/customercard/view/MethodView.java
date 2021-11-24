@@ -11,14 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Route(value = "/methods", layout = MainLayout.class)
 @PageTitle("Methods | Lashes")
 public class MethodView extends DictionaryView {
-    private final MethodService service;
-    private final ModelMapper mapper;
 
     @Autowired
     public MethodView(MethodService service, ModelMapper mapper) {
         super(service, mapper);
-        this.service = service;
-        this.mapper = mapper;
     }
 
     @Override

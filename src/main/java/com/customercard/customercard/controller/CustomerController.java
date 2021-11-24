@@ -34,7 +34,7 @@ public class CustomerController {
     public List<CustomerDto> getCustomer(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.map(customerService.getCustomers(id, txt), new TypeToken<List<CustomerDto>>() {
+        return mapper.map(customerService.getAllCustomers(id, txt), new TypeToken<List<CustomerDto>>() {
         }.getType());
     }
 
@@ -42,7 +42,7 @@ public class CustomerController {
     public List<CustomerGeneralDto> getCustomerGeneral(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return customerGeneralMapper.mapModelListToDtoList(customerService.getCustomers(id, txt));
+        return customerGeneralMapper.mapModelListToDtoList(customerService.getAllCustomers(id, txt));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

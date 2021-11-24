@@ -69,7 +69,7 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
-    public List<Customer> getCustomers(@Nullable String id, @Nullable String txt) {
+    public List<Customer> getAllCustomers(@Nullable String id, @Nullable String txt) {
         if (id != null) {
             return List.of(getById(id));
         } else if (txt != null) {
