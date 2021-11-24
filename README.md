@@ -4,7 +4,7 @@ API to store customer informations.
 To use you have to create application.properties files and provide MongoDB connection.
 
 Required data:
-```java
+```YAML
 
 #MongoDb connection
 db.login=<login>
