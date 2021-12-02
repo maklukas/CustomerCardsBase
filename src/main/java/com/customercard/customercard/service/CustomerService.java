@@ -92,7 +92,7 @@ public class CustomerService {
     public LocalDate getLastWorkDate(@NotNull Customer customer) {
         LocalDate lastDate = null;
 
-        if (customer.getLashesList() != null) {
+        if (customer.getLashesList() != null && customer.getLashesList().size() > 0) {
             lastDate = customer
                     .getLashesList()
                     .stream()
