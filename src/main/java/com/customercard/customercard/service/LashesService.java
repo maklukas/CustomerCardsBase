@@ -31,18 +31,18 @@ public class LashesService {
         this.colorService = colorService;
     }
 
-    public List<Lashes> getAllLashes() {
+    public List<Lashes> getAll() {
         LOGGER.info("All Lashes fetched.");
         return repo.findAll();
     }
 
-    public Lashes getLashesById(@Nullable String id) {
+    public Lashes getById(@Nullable String id) {
         LOGGER.info("Lashes fetched by id.");
         assert id != null;
         return repo.findById(id).orElse(new Lashes());
     }
 
-    public List<Lashes> getLashesByComment(@Nullable String txt) {
+    public List<Lashes> getByComment(@Nullable String txt) {
         LOGGER.info("All fetched by name.");
         return repo.findAll()
                 .stream()
@@ -51,17 +51,17 @@ public class LashesService {
 
     }
 
-    public List<Lashes> getLashes(@Nullable String id, @Nullable String txt) {
+    public List<Lashes> getAll(@Nullable String id, @Nullable String txt) {
         if (id != null) {
-            return List.of(getLashesById(id));
+            return List.of(getById(id));
         } else if (txt != null) {
-            return getLashesByComment(txt);
+            return getByComment(txt);
         } else {
-            return getAllLashes();
+            return getAll();
         }
     }
 
-    public Lashes createLashes(Lashes lashes) {
+    public Lashes create(Lashes lashes) {
         LOGGER.info("Lashes created.");
 
         if (validateIfExists(lashes)) {
@@ -83,7 +83,7 @@ public class LashesService {
         }
     }
 
-    public Lashes updateLashes(Lashes lashes) {
+    public Lashes update(Lashes lashes) {
 
         if (validateIfExists(lashes)) {
             return findFirstEqual(lashes);
@@ -94,7 +94,7 @@ public class LashesService {
         return repo.save(lashes);
     }
 
-    public boolean deleteLashes(String id) {
+    public boolean delete(String id) {
         LOGGER.info("Lashes deleted.");
         repo.deleteById(id);
         return true;
@@ -120,10 +120,9 @@ public class LashesService {
         if (updates.containsKey("nextDate")) {
             lashes.setNextDate((LocalDate) updates.get("nextDate"));
         }
-        updateLashes(lashes);
+        update(lashes);
         return true;
     }
-
 
     private void setSubClasses(Lashes lashes) {
         getMethodClass(lashes);

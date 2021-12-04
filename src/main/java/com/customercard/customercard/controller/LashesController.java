@@ -31,28 +31,28 @@ public class LashesController {
     public List<LashesDto> getLashes(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.map(lashesService.getLashes(id, txt), new TypeToken<List<LashesDto>>() {
+        return mapper.map(lashesService.getAll(id, txt), new TypeToken<List<LashesDto>>() {
         }.getType());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createLashes(@RequestBody LashesDto lashes) {
-        lashesService.createLashes(mapper.map(lashes, Lashes.class));
+        lashesService.create(mapper.map(lashes, Lashes.class));
     }
 
     @DeleteMapping("/{id}")
     public void deleteLashes(@PathVariable String id) {
-        lashesService.deleteLashes(id);
+        lashesService.delete(id);
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateLashes(@RequestBody LashesDto lashes) {
-        lashesService.updateLashes(mapper.map(lashes, Lashes.class));
+        lashesService.update(mapper.map(lashes, Lashes.class));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void partialUpdate(@RequestParam String id, @RequestBody Map<String, Object> updates) {
-        Lashes lashes = lashesService.getLashesById(id);
+        Lashes lashes = lashesService.getById(id);
         lashesService.partialUpdate(lashes, updates);
     }
 }

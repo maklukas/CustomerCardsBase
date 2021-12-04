@@ -32,25 +32,25 @@ public class CustomerService {
         this.contactService = contactService;
     }
 
-    public Customer createCustomer(Customer customer) {
+    public Customer create(Customer customer) {
         LOGGER.info("Customer added.");
         createSubClasses(customer);
         return repo.save(customer);
     }
 
-    public Customer updateCustomer(Customer customer) {
+    public Customer update(Customer customer) {
         createSubClasses(customer);
         LOGGER.info("Customer updated.");
         return repo.save(customer);
     }
 
-    public boolean deleteCustomer(String id) {
+    public boolean delete(String id) {
         repo.deleteById(id);
         LOGGER.info("Customer deleted.");
         return true;
     }
 
-    public List<Customer> getAllCustomers() {
+    public List<Customer> getAll() {
         LOGGER.info("Customers fetched.");
         return repo.findAll();
     }
@@ -69,13 +69,13 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
-    public List<Customer> getAllCustomers(@Nullable String id, @Nullable String txt) {
+    public List<Customer> getAll(@Nullable String id, @Nullable String txt) {
         if (id != null) {
             return List.of(getById(id));
         } else if (txt != null) {
             return getByNameFragment(txt);
         } else {
-            return getAllCustomers();
+            return getAll();
         }
     }
 
@@ -120,7 +120,7 @@ public class CustomerService {
         if (updates.containsKey("lashesList")) {
             customer.setLashesList(List.of((Lashes) updates.get("lashesList")));
         }
-        updateCustomer(customer);
+        update(customer);
         return true;
     }
 
@@ -139,7 +139,7 @@ public class CustomerService {
 
         if (lashesList.size() > 0) {
             for (Lashes theLash: lashesList) {
-                newList.add(lashesService.createLashes(theLash));
+                newList.add(lashesService.create(theLash));
             }
         }
 
@@ -148,7 +148,7 @@ public class CustomerService {
 
     private void createContact(Customer customer) {
         if (customer.getContact() != null) {
-            customer.setContact(contactService.createContact(customer.getContact()));
+            customer.setContact(contactService.create(customer.getContact()));
         }
     }
 

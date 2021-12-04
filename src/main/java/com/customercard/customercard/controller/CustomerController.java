@@ -34,7 +34,7 @@ public class CustomerController {
     public List<CustomerDto> getCustomer(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.map(customerService.getAllCustomers(id, txt), new TypeToken<List<CustomerDto>>() {
+        return mapper.map(customerService.getAll(id, txt), new TypeToken<List<CustomerDto>>() {
         }.getType());
     }
 
@@ -42,22 +42,22 @@ public class CustomerController {
     public List<CustomerGeneralDto> getCustomerGeneral(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return customerGeneralMapper.mapModelListToDtoList(customerService.getAllCustomers(id, txt));
+        return customerGeneralMapper.mapModelListToDtoList(customerService.getAll(id, txt));
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createCustomer(@RequestBody CustomerDto customer) {
-        customerService.createCustomer(mapper.map(customer, Customer.class));
+        customerService.create(mapper.map(customer, Customer.class));
     }
 
     @DeleteMapping("/{id}")
     public void deleteCustomer(@PathVariable String id) {
-        customerService.deleteCustomer(id);
+        customerService.delete(id);
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateCustomer(@RequestBody CustomerDto customer) {
-        customerService.updateCustomer(mapper.map(customer, Customer.class));
+        customerService.update(mapper.map(customer, Customer.class));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)

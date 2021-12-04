@@ -3,8 +3,10 @@ package com.customercard.customercard.view;
 import com.customercard.customercard.mapper.CustomerGeneralMapper;
 import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
+import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.model.Lashes;
 import com.customercard.customercard.model.dto.CustomerGeneralDto;
+import com.customercard.customercard.model.dto.LashesDto;
 import com.customercard.customercard.service.CustomerService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
@@ -24,7 +26,10 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.jetbrains.annotations.Nullable;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 
 import java.util.List;
 import java.util.Objects;
@@ -35,12 +40,14 @@ public class CustomerView extends VerticalLayout {
 
     private final CustomerService service;
     private final CustomerGeneralMapper customerGeneralMapper;
+    private final ModelMapper mapper;
     private String findValue;
     private Grid<CustomerGeneralDto> theGrid;
 
-    public CustomerView(CustomerService service, CustomerGeneralMapper customerGeneralMapper) {
+    public CustomerView(CustomerService service, CustomerGeneralMapper customerGeneralMapper, ModelMapper mapper) {
         this.service = service;
         this.customerGeneralMapper = customerGeneralMapper;
+        this.mapper = mapper;
         add(getFindTextFieldComponent(), plusIconComponent());
         add(getTheGrid());
     }
@@ -78,9 +85,6 @@ public class CustomerView extends VerticalLayout {
         return icon;
     }
 
-/*    TODO CREATE popupCreate function for customerView
-        popupCreate function must open popup and give possibility to create new Customer
- */
     public void popupCreate(String id) {
 
         Dialog dialog = new Dialog();
@@ -105,7 +109,7 @@ public class CustomerView extends VerticalLayout {
         TextField cityField = new TextField("City");
 
         if (!id.equals("")) {
-            Customer theCustomer = service.getAllCustomers(id, "").get(0);
+            Customer theCustomer = service.getAll(id, "").get(0);
 
             firstNameField.setValue(getValueOrReturnEmpty(theCustomer.getName()));
             surnameField.setValue(getValueOrReturnEmpty(theCustomer.getSurname()));
@@ -155,10 +159,10 @@ public class CustomerView extends VerticalLayout {
                         ));
 
                 if (id.equals("")) {
-                    service.createCustomer(customer);
+                    service.create(customer);
                 } else {
                     customer.setId(id);
-                    service.updateCustomer(customer);
+                    service.update(customer);
                 }
 
                 createdNote.open();
@@ -209,7 +213,7 @@ public class CustomerView extends VerticalLayout {
         Notification deletedNote = new Notification("Deleted", 3000);
 
         Button confirmButton = new Button("Confirm", event -> {
-            service.deleteCustomer(id);
+            service.delete(id);
             deletedNote.open();
             dialog.close();
             getTheGrid();
@@ -221,12 +225,11 @@ public class CustomerView extends VerticalLayout {
     }
 
     /*TODO finish getTheGrid function:
-        * create popup on row click
-        * add column with remove button
+        * create popup that show lashes list on row click
      */
     private Grid<CustomerGeneralDto> getTheGrid() {
         Grid<CustomerGeneralDto> grid = new Grid<>(CustomerGeneralDto.class);
-        grid.setItems(customerGeneralMapper.mapModelListToDtoList(service.getAllCustomers(null, findValue)));
+        grid.setItems(customerGeneralMapper.mapModelListToDtoList(service.getAll(null, findValue)));
         grid.removeColumnByKey("id");
 
         grid.addItemClickListener(it ->
@@ -247,9 +250,42 @@ public class CustomerView extends VerticalLayout {
         return grid;
     }
 
-    //TODO finish openLashesPopup function - in  the popup i should can see grid of lashes
+    //TODO make openLashesPopup function - in the popup i should can see grid of lashes
     private void openLashesPopup(String id) {
+        Dialog dialog = new Dialog();
+       // dialog.setCloseOnEsc(true);
+        dialog.setDraggable(true);
+        dialog.setResizable(true);
+//        dialog.setHeightFull();
+//        dialog.setWidthFull();
+
+        dialog.open();
+
+        Text description = new Text("Lashes creations list for the customer.");
+        dialog.add(new Div(description));
+
+        dialog.add(new Div(getTheLashesGrid(id)));
+
+        Button closeButton = new Button("Close", event -> dialog.close());
+        dialog.add(new Div(closeButton));
+
         //List<Lashes> lashesList = service.getById(id).getLashesList();
+    }
+
+    private Grid<LashesDto> getTheLashesGrid(String id) {
+        Grid<LashesDto> grid = new Grid<>(LashesDto.class);
+        List<LashesDto> lashesList = mapper.map(service.getAll(id, "").get(0).getLashesList(), new TypeToken<List<LashesDto>>() {
+        }.getType());
+
+        grid.setItems(lashesList);
+        grid.removeColumnByKey("id");
+
+        grid.setColumns("style", "method", "color", "comment", "date", "nextDate");
+
+        grid.addComponentColumn(it -> getEditIcon(it.getId()));
+        grid.addComponentColumn(it -> getRemoveIcon(it.getId()));
+
+        return grid;
     }
 
     private String getValueOrReturnEmpty(String value) {
