@@ -4,7 +4,9 @@ import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.service.DictionaryService;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
@@ -27,7 +29,7 @@ public abstract class DictionaryView extends VerticalLayout {
     public DictionaryView(DictionaryService service, ModelMapper mapper) {
         this.service = service;
         this.mapper = mapper;
-        add(getFindTextFieldComponent(), plusIconComponent());
+        add(getFindTextFieldComponent(), getCreateButton());
         add(getTheGrid());
     }
 
@@ -50,18 +52,6 @@ public abstract class DictionaryView extends VerticalLayout {
         return textField;
     }
 
-    public Icon plusIconComponent() {
-        Icon icon = new Icon(VaadinIcon.PLUS_CIRCLE);
-        String mouseOutColor = "#0006c7";
-        icon.setColor(mouseOutColor);
-        icon.addClickListener(it -> popupCreate());
-
-        icon.getElement().addEventListener("mouseover", it -> icon.setColor("#0007f2"));
-        icon.getElement().addEventListener("mouseout", it -> icon.setColor(mouseOutColor));
-
-        return icon;
-    }
-
     private Grid<Dictionary> getTheGrid() {
         Grid<Dictionary> grid = new Grid<>(Dictionary.class);
         List<Dictionary> dictionaries = mapper.map(service.getAll(null, findValue), new TypeToken<List<Dictionary>>() {
@@ -70,7 +60,9 @@ public abstract class DictionaryView extends VerticalLayout {
 
         grid.removeColumnByKey("id");
         grid.setColumns("name");
-        grid.addComponentColumn(it -> getRemoveIcon(it.getId()));
+        Grid.Column<Dictionary> removeCol = grid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
+
+        removeCol.setTextAlign(ColumnTextAlign.CENTER);
 
         if (theGrid != null) {
             int oldId = indexOf(theGrid);
@@ -80,19 +72,6 @@ public abstract class DictionaryView extends VerticalLayout {
 
         theGrid = grid;
         return grid;
-    }
-
-    public Icon getRemoveIcon(String id) {
-        Icon removeIcon = new Icon(VaadinIcon.MINUS_CIRCLE);
-        String mouseOutColor = "#c70000";
-        removeIcon.setColor(mouseOutColor);
-        removeIcon.addClickListener(it -> removePopupCreate(id));
-
-        removeIcon.getElement().getStyle().set("vertical-align", "right");
-        removeIcon.getElement().addEventListener("mouseover", it -> removeIcon.setColor("#ff0303"));
-        removeIcon.getElement().addEventListener("mouseout", it -> removeIcon.setColor(mouseOutColor));
-
-        return removeIcon;
     }
 
     public void removePopupCreate(String id) {
@@ -140,6 +119,22 @@ public abstract class DictionaryView extends VerticalLayout {
         Shortcuts.addShortcutListener(dialog, confirmButton::click, Key.ENTER);
         Button cancelButton = new Button("Cancel", event -> dialog.close());
         dialog.add(new Div(confirmButton, cancelButton));
+    }
+
+    public Button getCreateButton() {
+        Button icon = new Button();
+        icon.setIcon(VaadinIcon.PLUS_CIRCLE.create());
+        icon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        icon.addClickListener(it -> popupCreate());
+        return icon;
+    }
+
+    public Button getRemoveButton(String id) {
+        Button removeButton = new Button();
+        removeButton.setIcon(VaadinIcon.TRASH.create());
+        removeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
+        removeButton.addClickListener(it -> removePopupCreate(id));
+        return removeButton;
     }
 
         public abstract Dictionary getObject(String name);

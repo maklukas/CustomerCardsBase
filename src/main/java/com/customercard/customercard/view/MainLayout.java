@@ -4,6 +4,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -27,16 +30,25 @@ public class MainLayout extends AppLayout {
                 .set("margin", "0");
 
         Tabs tabs = getTabs();
-
         addToDrawer(tabs);
-        addToNavbar(toggle, title, toggleIcon());
+
+        Button toggleButton = toggleButton();
+
+        addToNavbar(toggle, title);
+
+        Div b = new Div();
+        b.add(toggleButton);
+        b.getStyle().set("margin-left", "auto");
+        b.getStyle().set("padding", "15px");
+        addToNavbar(b);
 
     }
 
+    public Button toggleButton() {
+        Button toggle = new Button();
+        toggle.setIcon(VaadinIcon.ADJUST.create());
+        toggle.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_CONTRAST);
 
-    //@Todo align int to right
-    public Icon toggleIcon() {
-        Icon toggle = new Icon(VaadinIcon.ADJUST);
         toggle.addClickListener(it -> {
             ThemeList themeList = UI.getCurrent().getElement().getThemeList();
 
@@ -72,7 +84,6 @@ public class MainLayout extends AppLayout {
 
         RouterLink link = new RouterLink();
         link.add(icon, new Span(viewName));
-        // Demo has no routes
         link.setRoute(route);
         link.setTabIndex(-1);
 

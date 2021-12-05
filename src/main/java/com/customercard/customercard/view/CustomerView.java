@@ -3,8 +3,6 @@ package com.customercard.customercard.view;
 import com.customercard.customercard.mapper.CustomerGeneralMapper;
 import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
-import com.customercard.customercard.model.Dictionary;
-import com.customercard.customercard.model.Lashes;
 import com.customercard.customercard.model.dto.CustomerGeneralDto;
 import com.customercard.customercard.model.dto.LashesDto;
 import com.customercard.customercard.service.CustomerService;
@@ -12,6 +10,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -26,8 +25,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 
@@ -48,7 +45,7 @@ public class CustomerView extends VerticalLayout {
         this.service = service;
         this.customerGeneralMapper = customerGeneralMapper;
         this.mapper = mapper;
-        add(getFindTextFieldComponent(), plusIconComponent());
+        add(getFindTextFieldComponent(), getCreateButton());
         add(getTheGrid());
     }
 
@@ -72,18 +69,7 @@ public class CustomerView extends VerticalLayout {
         return textField;
     }
 
-    public Icon plusIconComponent() {
-        Icon icon = new Icon(VaadinIcon.PLUS_CIRCLE);
-        String mouseOutColor = "#0006c7";
-        icon.setColor(mouseOutColor);
 
-        icon.addClickListener(it -> popupCreate(""));
-
-        icon.getElement().addEventListener("mouseover", it -> icon.setColor("#0007f2"));
-        icon.getElement().addEventListener("mouseout", it -> icon.setColor(mouseOutColor));
-
-        return icon;
-    }
 
     public void popupCreate(String id) {
 
@@ -176,31 +162,28 @@ public class CustomerView extends VerticalLayout {
         dialog.add(new Div(confirmButton, cancelButton));
     }
 
-    //OK
-    public Icon getRemoveIcon(String id) {
-        Icon removeIcon = new Icon(VaadinIcon.MINUS_CIRCLE);
-        String mouseOutColor = "#c70000";
-        removeIcon.setColor(mouseOutColor);
-        removeIcon.addClickListener(it -> removePopupCreate(id));
-
-        removeIcon.getElement().getStyle().set("vertical-align", "right");
-        removeIcon.getElement().addEventListener("mouseover", it -> removeIcon.setColor("#ff0303"));
-        removeIcon.getElement().addEventListener("mouseout", it -> removeIcon.setColor(mouseOutColor));
-
-        return removeIcon;
+    public Button getCreateButton() {
+        Button icon = new Button();
+        icon.setIcon(VaadinIcon.PLUS_CIRCLE.create());
+        icon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        icon.addClickListener(it -> popupCreate(""));
+        return icon;
     }
 
-    public Icon getEditIcon(String id) {
-        Icon editIcon = new Icon(VaadinIcon.EDIT);
-        String mouseOutColor = "#404040";
-        editIcon.setColor(mouseOutColor);
-        editIcon.addClickListener(it -> popupCreate(id));
+    public Button getRemoveButton(String id) {
+        Button removeButton = new Button();
+        removeButton.setIcon(VaadinIcon.TRASH.create());
+        removeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
+        removeButton.addClickListener(it -> removePopupCreate(id));
+        return removeButton;
+    }
 
-        editIcon.getElement().getStyle().set("vertical-align", "right");
-        editIcon.getElement().addEventListener("mouseover", it -> editIcon.setColor("#000000"));
-        editIcon.getElement().addEventListener("mouseout", it -> editIcon.setColor(mouseOutColor));
-
-        return editIcon;
+    public Button getEditButton(String id) {
+        Button editButton = new Button();
+        editButton.setIcon(VaadinIcon.EDIT.create());
+        editButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_CONTRAST);
+        editButton.addClickListener(it -> popupCreate(id));
+        return editButton;
     }
 
     //OK
@@ -218,8 +201,8 @@ public class CustomerView extends VerticalLayout {
             dialog.close();
             getTheGrid();
         });
-
         Shortcuts.addShortcutListener(dialog, confirmButton::click, Key.ENTER);
+
         Button cancelButton = new Button("Cancel", event -> dialog.close());
         dialog.add(new Div(confirmButton, cancelButton));
     }
@@ -237,8 +220,8 @@ public class CustomerView extends VerticalLayout {
         );
 
         grid.setColumns("name", "surname", "lastDate", "totalWorks");
-        grid.addComponentColumn(it -> getEditIcon(it.getId()));
-        grid.addComponentColumn(it -> getRemoveIcon(it.getId()));
+        grid.addComponentColumn(it -> getEditButton(it.getId())).setHeader("Edit");
+        grid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
 
         if (theGrid != null) {
             int oldId = indexOf(theGrid);
@@ -253,12 +236,10 @@ public class CustomerView extends VerticalLayout {
     //TODO make openLashesPopup function - in the popup i should can see grid of lashes
     private void openLashesPopup(String id) {
         Dialog dialog = new Dialog();
-       // dialog.setCloseOnEsc(true);
         dialog.setDraggable(true);
         dialog.setResizable(true);
-//        dialog.setHeightFull();
-//        dialog.setWidthFull();
 
+        dialog.setWidthFull();
         dialog.open();
 
         Text description = new Text("Lashes creations list for the customer.");
@@ -282,8 +263,8 @@ public class CustomerView extends VerticalLayout {
 
         grid.setColumns("style", "method", "color", "comment", "date", "nextDate");
 
-        grid.addComponentColumn(it -> getEditIcon(it.getId()));
-        grid.addComponentColumn(it -> getRemoveIcon(it.getId()));
+        grid.addComponentColumn(it -> getEditButton(it.getId()));
+        grid.addComponentColumn(it -> getRemoveButton(it.getId()));
 
         return grid;
     }
