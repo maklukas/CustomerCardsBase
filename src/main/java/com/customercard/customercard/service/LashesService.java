@@ -3,6 +3,7 @@ package com.customercard.customercard.service;
 import com.customercard.customercard.model.*;
 import com.customercard.customercard.repository.LashesRepo;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,6 +166,22 @@ public class LashesService {
                     .orElse(null);
         }
         return null;
+    }
+
+    public List<Lashes> getAll(@NotNull Customer customer, @Nullable String txt) {
+        List<Lashes> lashesList = customer.getLashesList();
+
+        if (txt != null) {
+            return lashesList.stream()
+                    .filter(lash -> StringUtils.containsIgnoreCase(lash.getStyle(), txt)
+                            || StringUtils.containsIgnoreCase(lash.getMethod(), txt)
+                            || StringUtils.containsIgnoreCase(lash.getColor(), txt)
+                            || StringUtils.containsIgnoreCase(lash.getComment(), txt))
+                    .collect(Collectors.toList());
+
+        } else {
+            return lashesList;
+        }
     }
 
 }

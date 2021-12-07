@@ -4,8 +4,8 @@ import com.customercard.customercard.mapper.CustomerGeneralMapper;
 import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.dto.CustomerGeneralDto;
-import com.customercard.customercard.model.dto.LashesDto;
 import com.customercard.customercard.service.CustomerService;
+import com.customercard.customercard.service.LashesService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Text;
@@ -14,6 +14,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -26,9 +27,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 
-import java.util.List;
 import java.util.Objects;
 
 @Route(value = "", layout = MainLayout.class)
@@ -36,15 +35,18 @@ import java.util.Objects;
 public class CustomerView extends VerticalLayout {
 
     private final CustomerService service;
+    private final LashesService lashesService;
     private final CustomerGeneralMapper customerGeneralMapper;
     private final ModelMapper mapper;
     private String findValue;
     private Grid<CustomerGeneralDto> theGrid;
 
-    public CustomerView(CustomerService service, CustomerGeneralMapper customerGeneralMapper, ModelMapper mapper) {
+
+    public CustomerView(CustomerService service, CustomerGeneralMapper customerGeneralMapper, ModelMapper mapper, LashesService lashesService) {
         this.service = service;
         this.customerGeneralMapper = customerGeneralMapper;
         this.mapper = mapper;
+        this.lashesService = lashesService;
         add(getFindTextFieldComponent(), getCreateButton());
         add(getTheGrid());
     }
@@ -69,7 +71,9 @@ public class CustomerView extends VerticalLayout {
         return textField;
     }
 
-
+    public void popupCreate() {
+        popupCreate("");
+    }
 
     public void popupCreate(String id) {
 
@@ -166,9 +170,12 @@ public class CustomerView extends VerticalLayout {
         Button icon = new Button();
         icon.setIcon(VaadinIcon.PLUS_CIRCLE.create());
         icon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-        icon.addClickListener(it -> popupCreate(""));
+
+        icon.addClickListener(it -> popupCreate());
+
         return icon;
     }
+
 
     public Button getRemoveButton(String id) {
         Button removeButton = new Button();
@@ -207,17 +214,13 @@ public class CustomerView extends VerticalLayout {
         dialog.add(new Div(confirmButton, cancelButton));
     }
 
-    /*TODO finish getTheGrid function:
-        * create popup that show lashes list on row click
-     */
+
     private Grid<CustomerGeneralDto> getTheGrid() {
         Grid<CustomerGeneralDto> grid = new Grid<>(CustomerGeneralDto.class);
         grid.setItems(customerGeneralMapper.mapModelListToDtoList(service.getAll(null, findValue)));
         grid.removeColumnByKey("id");
 
-        grid.addItemClickListener(it ->
-            openLashesPopup(it.getItem().getId())
-        );
+        grid.addItemClickListener(it -> createLashesPopup(it.getItem().getId()));
 
         grid.setColumns("name", "surname", "lastDate", "totalWorks");
         grid.addComponentColumn(it -> getEditButton(it.getId())).setHeader("Edit");
@@ -233,40 +236,19 @@ public class CustomerView extends VerticalLayout {
         return grid;
     }
 
-    //TODO make openLashesPopup function - in the popup i should can see grid of lashes
-    private void openLashesPopup(String id) {
-        Dialog dialog = new Dialog();
-        dialog.setDraggable(true);
-        dialog.setResizable(true);
+    private void createLashesPopup(String id) {
 
-        dialog.setWidthFull();
-        dialog.open();
+        Dialog lashesDialog = new Dialog();
+        lashesDialog.setDraggable(true);
+        lashesDialog.setResizable(true);
 
-        Text description = new Text("Lashes creations list for the customer.");
-        dialog.add(new Div(description));
+        lashesDialog.setWidthFull();
+        lashesDialog.open();
+        LashesView lashesView = new LashesView(lashesService, mapper, service.getById(id));
+        lashesDialog.add(lashesView);
 
-        dialog.add(new Div(getTheLashesGrid(id)));
-
-        Button closeButton = new Button("Close", event -> dialog.close());
-        dialog.add(new Div(closeButton));
-
-        //List<Lashes> lashesList = service.getById(id).getLashesList();
-    }
-
-    private Grid<LashesDto> getTheLashesGrid(String id) {
-        Grid<LashesDto> grid = new Grid<>(LashesDto.class);
-        List<LashesDto> lashesList = mapper.map(service.getAll(id, "").get(0).getLashesList(), new TypeToken<List<LashesDto>>() {
-        }.getType());
-
-        grid.setItems(lashesList);
-        grid.removeColumnByKey("id");
-
-        grid.setColumns("style", "method", "color", "comment", "date", "nextDate");
-
-        grid.addComponentColumn(it -> getEditButton(it.getId()));
-        grid.addComponentColumn(it -> getRemoveButton(it.getId()));
-
-        return grid;
+        Button closeButton = new Button("Close", event -> lashesDialog.close());
+        lashesDialog.add(new Div(closeButton));
     }
 
     private String getValueOrReturnEmpty(String value) {
