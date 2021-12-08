@@ -14,7 +14,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -47,28 +46,29 @@ public class CustomerView extends VerticalLayout {
         this.customerGeneralMapper = customerGeneralMapper;
         this.mapper = mapper;
         this.lashesService = lashesService;
+        initTheGrid();
         add(getFindTextFieldComponent(), getCreateButton());
-        add(getTheGrid());
+        add(theGrid);
     }
 
-    //OK
     private TextField getFindTextFieldComponent() {
-        TextField textField = new TextField();
-        textField.setPlaceholder("Search");
+        TextField findTextField = new TextField();
+        findTextField.setPlaceholder("Search");
+        findTextField.setClearButtonVisible(true);
         Icon icon = VaadinIcon.SEARCH.create();
-        textField.setPrefixComponent(icon);
+        findTextField.setPrefixComponent(icon);
 
-        textField.addValueChangeListener(it -> {
+        findTextField.addValueChangeListener(it -> {
             findValue = it.getValue();
             if (findValue.equals("")) {
                 findValue = null;
             }
-            getTheGrid();
+            getTheGridItems();
         });
 
-        textField.setValueChangeMode(ValueChangeMode.EAGER);
+        findTextField.setValueChangeMode(ValueChangeMode.EAGER);
 
-        return textField;
+        return findTextField;
     }
 
     public void popupCreate() {
@@ -157,7 +157,7 @@ public class CustomerView extends VerticalLayout {
 
                 createdNote.open();
                 dialog.close();
-                getTheGrid();
+                getTheGridItems();
             }
         });
 
@@ -193,7 +193,6 @@ public class CustomerView extends VerticalLayout {
         return editButton;
     }
 
-    //OK
     public void removePopupCreate(String id) {
         Dialog dialog = new Dialog();
         dialog.open();
@@ -206,7 +205,7 @@ public class CustomerView extends VerticalLayout {
             service.delete(id);
             deletedNote.open();
             dialog.close();
-            getTheGrid();
+            getTheGridItems();
         });
         Shortcuts.addShortcutListener(dialog, confirmButton::click, Key.ENTER);
 
@@ -214,26 +213,20 @@ public class CustomerView extends VerticalLayout {
         dialog.add(new Div(confirmButton, cancelButton));
     }
 
+    private void initTheGrid() {
+        theGrid = new Grid<>(CustomerGeneralDto.class);
+        getTheGridItems();
+        theGrid.removeColumnByKey("id");
 
-    private Grid<CustomerGeneralDto> getTheGrid() {
-        Grid<CustomerGeneralDto> grid = new Grid<>(CustomerGeneralDto.class);
-        grid.setItems(customerGeneralMapper.mapModelListToDtoList(service.getAll(null, findValue)));
-        grid.removeColumnByKey("id");
+        theGrid.addItemClickListener(it -> createLashesPopup(it.getItem().getId()));
 
-        grid.addItemClickListener(it -> createLashesPopup(it.getItem().getId()));
+        theGrid.setColumns("name", "surname", "lastDate", "totalWorks");
+        theGrid.addComponentColumn(it -> getEditButton(it.getId())).setHeader("Edit");
+        theGrid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
+    }
 
-        grid.setColumns("name", "surname", "lastDate", "totalWorks");
-        grid.addComponentColumn(it -> getEditButton(it.getId())).setHeader("Edit");
-        grid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
-
-        if (theGrid != null) {
-            int oldId = indexOf(theGrid);
-            remove(theGrid);
-            addComponentAtIndex(oldId, grid);
-        }
-
-        theGrid = grid;
-        return grid;
+    private void getTheGridItems() {
+        theGrid.setItems(customerGeneralMapper.mapModelListToDtoList(service.getAll(null, findValue)));
     }
 
     private void createLashesPopup(String id) {
@@ -251,7 +244,7 @@ public class CustomerView extends VerticalLayout {
         lashesDialog.add(new Div(closeButton));
     }
 
-    private String getValueOrReturnEmpty(String value) {
+    public static String getValueOrReturnEmpty(String value) {
         return Objects.requireNonNullElse(value, "");
     }
 }

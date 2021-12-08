@@ -29,49 +29,46 @@ public abstract class DictionaryView extends VerticalLayout {
     public DictionaryView(DictionaryService service, ModelMapper mapper) {
         this.service = service;
         this.mapper = mapper;
+        initTheGrid();
         add(getFindTextFieldComponent(), getCreateButton());
-        add(getTheGrid());
+        add(theGrid);
     }
 
     private TextField getFindTextFieldComponent() {
-        TextField textField = new TextField();
-        textField.setPlaceholder("Search");
+        TextField findTextField = new TextField();
+        findTextField.setPlaceholder("Search");
+        findTextField.setClearButtonVisible(true);
         Icon icon = VaadinIcon.SEARCH.create();
-        textField.setPrefixComponent(icon);
+        findTextField.setPrefixComponent(icon);
 
-        textField.addValueChangeListener(it -> {
+        findTextField.addValueChangeListener(it -> {
             findValue = it.getValue();
             if (findValue.equals("")) {
                 findValue = null;
             }
-            getTheGrid();
+            setTheGridItems();
         });
 
-        textField.setValueChangeMode(ValueChangeMode.EAGER);
+        findTextField.setValueChangeMode(ValueChangeMode.EAGER);
 
-        return textField;
+        return findTextField;
     }
 
-    private Grid<Dictionary> getTheGrid() {
-        Grid<Dictionary> grid = new Grid<>(Dictionary.class);
-        List<Dictionary> dictionaries = mapper.map(service.getAll(null, findValue), new TypeToken<List<Dictionary>>() {
-            }.getType());
-        grid.setItems(dictionaries);
-
-        grid.removeColumnByKey("id");
-        grid.setColumns("name");
-        Grid.Column<Dictionary> removeCol = grid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
+    public void initTheGrid() {
+        theGrid = new Grid<>(Dictionary.class);
+        setTheGridItems();
+        theGrid.removeColumnByKey("id");
+        theGrid.setColumns("name");
+        Grid.Column<Dictionary> removeCol = theGrid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
 
         removeCol.setTextAlign(ColumnTextAlign.CENTER);
 
-        if (theGrid != null) {
-            int oldId = indexOf(theGrid);
-            remove(theGrid);
-            addComponentAtIndex(oldId, grid);
-        }
+    }
 
-        theGrid = grid;
-        return grid;
+    private void setTheGridItems() {
+        List<Dictionary> dictionaries = mapper.map(service.getAll(null, findValue), new TypeToken<List<Dictionary>>() {
+            }.getType());
+        theGrid.setItems(dictionaries);
     }
 
     public void removePopupCreate(String id) {
@@ -86,7 +83,7 @@ public abstract class DictionaryView extends VerticalLayout {
             service.delete(id);
             deletedNote.open();
             dialog.close();
-            getTheGrid();
+            setTheGridItems();
         });
 
         Shortcuts.addShortcutListener(dialog, confirmButton::click, Key.ENTER);
@@ -112,7 +109,7 @@ public abstract class DictionaryView extends VerticalLayout {
                 service.create(getObject(textField.getValue()));
                 createdNote.open();
                 dialog.close();
-                getTheGrid();
+                setTheGridItems();
             }
         });
 
