@@ -120,16 +120,14 @@ public abstract class DictionaryView extends VerticalLayout {
 
     public Button getCreateButton() {
         Button icon = new Button();
-        icon.setIcon(VaadinIcon.PLUS_CIRCLE.create());
-        icon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        ComponentStyle.setCreateButtonStyle(icon);
         icon.addClickListener(it -> popupCreate());
         return icon;
     }
 
     public Button getRemoveButton(String id) {
         Button removeButton = new Button();
-        removeButton.setIcon(VaadinIcon.TRASH.create());
-        removeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
+        ComponentStyle.setRemoveButtonStyle(removeButton);
         removeButton.addClickListener(it -> removePopupCreate(id));
         return removeButton;
     }

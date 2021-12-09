@@ -168,27 +168,22 @@ public class CustomerView extends VerticalLayout {
 
     public Button getCreateButton() {
         Button icon = new Button();
-        icon.setIcon(VaadinIcon.PLUS_CIRCLE.create());
-        icon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-
+        ComponentStyle.setCreateButtonStyle(icon);
         icon.addClickListener(it -> popupCreate());
-
         return icon;
     }
 
 
     public Button getRemoveButton(String id) {
         Button removeButton = new Button();
-        removeButton.setIcon(VaadinIcon.TRASH.create());
-        removeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
+        ComponentStyle.setRemoveButtonStyle(removeButton);
         removeButton.addClickListener(it -> removePopupCreate(id));
         return removeButton;
     }
 
     public Button getEditButton(String id) {
         Button editButton = new Button();
-        editButton.setIcon(VaadinIcon.EDIT.create());
-        editButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_CONTRAST);
+        ComponentStyle.setEditButtonStyle(editButton);
         editButton.addClickListener(it -> popupCreate(id));
         return editButton;
     }
@@ -237,11 +232,20 @@ public class CustomerView extends VerticalLayout {
 
         lashesDialog.setWidthFull();
         lashesDialog.open();
-        LashesView lashesView = new LashesView(lashesService, mapper, service.getById(id));
+        LashesView lashesView = new LashesView(lashesService, mapper, service.getById(id), service);
         lashesDialog.add(lashesView);
 
-        Button closeButton = new Button("Close", event -> lashesDialog.close());
+        Button closeButton = new Button("Close", event ->
+            closeLashesDialogAndRefresh(lashesDialog)
+        );
+
+        lashesDialog.addDialogCloseActionListener(event -> closeButton.click());
         lashesDialog.add(new Div(closeButton));
+    }
+
+    private void closeLashesDialogAndRefresh(Dialog lashesDialog) {
+        lashesDialog.close();
+        getTheGridItems();
     }
 
     public static String getValueOrReturnEmpty(String value) {

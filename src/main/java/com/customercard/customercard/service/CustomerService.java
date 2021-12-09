@@ -118,10 +118,15 @@ public class CustomerService {
             customer.setContact((Contact) updates.get("contact"));
         }
         if (updates.containsKey("lashesList")) {
-            customer.setLashesList(List.of((Lashes) updates.get("lashesList")));
+            customer.setLashesList(cast(updates.get("lashesList")));
         }
         update(customer);
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends List<?>> T cast(Object obj) {
+        return (T) obj;
     }
 
     private void createSubClasses(Customer customer) {

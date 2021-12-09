@@ -38,11 +38,12 @@ public class MainLayout extends AppLayout {
 
         Div b = new Div();
         b.add(toggleButton);
-        b.getStyle().set("margin-left", "auto");
-        b.getStyle().set("padding", "15px");
+        ComponentStyle.setDivAliginToRightStyle(b);
         addToNavbar(b);
 
     }
+
+
 
     public Button toggleButton() {
         Button toggle = new Button();

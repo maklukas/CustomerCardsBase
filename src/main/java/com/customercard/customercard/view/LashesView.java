@@ -4,6 +4,7 @@ import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Lashes;
 import com.customercard.customercard.model.dto.LashesDto;
+import com.customercard.customercard.service.CustomerService;
 import com.customercard.customercard.service.LashesService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
@@ -18,7 +19,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -26,21 +26,25 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LashesView extends Div {
 
     private final LashesService service;
     private final ModelMapper mapper;
+    private final CustomerService customerService;
+    private final Customer customer;
 
-    private Customer customer;
     private Grid<LashesDto> theInnerGrid;
     private String findInnerValue;
 
-    public LashesView(LashesService service, ModelMapper mapper, Customer customer) {
+    public LashesView(LashesService service, ModelMapper mapper, Customer customer, CustomerService customerService) {
         this.service = service;
         this.mapper = mapper;
         this.customer = customer;
+        this.customerService = customerService;
         openLashesPopup();
     }
 
@@ -49,7 +53,7 @@ public class LashesView extends Div {
         Text description = new Text("Lashes creations list for the " + customer.getName() + ".");
         add(new Div(description));
         add(new Div(getFindTextFieldComponent()));
-        add(new Div(getCreateButton()));;
+        add(new Div(getCreateButton()));
         add(new Div(theInnerGrid));
 
     }
@@ -93,33 +97,25 @@ public class LashesView extends Div {
 
     public Button getCreateButton() {
         Button icon = new Button();
-        icon.setIcon(VaadinIcon.PLUS_CIRCLE.create());
-        icon.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-
+        ComponentStyle.setCreateButtonStyle(icon);
         icon.addClickListener(it -> popupCreate());
-
         return icon;
     }
 
-    //TODO get buttons styles into separate class
     public Button getRemoveButton(String id) {
         Button removeButton = new Button();
-        removeButton.setIcon(VaadinIcon.TRASH.create());
-        removeButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_ERROR);
+        ComponentStyle.setRemoveButtonStyle(removeButton);
         removeButton.addClickListener(it -> removePopupCreate(id));
         return removeButton;
     }
 
-    //TODO like above
     public Button getEditButton(String id) {
         Button editButton = new Button();
-        editButton.setIcon(VaadinIcon.EDIT.create());
-        editButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_CONTRAST);
+        ComponentStyle.setEditButtonStyle(editButton);
         editButton.addClickListener(it -> popupCreate(id));
         return editButton;
     }
 
-    //TODO check if ok
     public void removePopupCreate(String id) {
         Dialog dialog = new Dialog();
         dialog.open();
@@ -129,6 +125,7 @@ public class LashesView extends Div {
         Notification deletedNote = new Notification("Deleted", 3000);
         Button confirmButton = new Button("Confirm", event -> {
             customer.getLashesList().remove(service.getById(id));
+            updateCustomerRepo();
             service.delete(id);
             deletedNote.open();
             dialog.close();
@@ -144,7 +141,6 @@ public class LashesView extends Div {
         popupCreate("");
     }
 
-    //@TODO fix saving things into repository
     public void popupCreate(String id) {
 
         Dialog dialog = new Dialog();
@@ -203,18 +199,25 @@ public class LashesView extends Div {
             if (!styleField.isEmpty() || !methodField.isEmpty() || !colorField.isEmpty() || !commentField.isEmpty()) {
 
                 Lashes lashes = new Lashes();
+                lashes.setStyle(styleField.getValue());
+                lashes.setMethod(methodField.getValue());
+                lashes.setColor(colorField.getValue());
                 lashes.setComment(commentField.getValue());
+                lashes.setDate(dateField.getValue());
+                lashes.setNextDate(nextDateField.getValue());
 
                 if (id.equals("")) {
                     service.create(lashes);
                     customer.getLashesList().add(lashes);
+
                 } else {
-                    customer.setId(id);
-                    service.update(lashes);
                     int listId = customer.getLashesList().indexOf(service.getAll(id, "").get(0));
+                    lashes.setId(id);
+                    service.update(lashes);
                     customer.getLashesList().set(listId, lashes);
                 }
 
+                updateCustomerRepo();
                 createdNote.open();
                 dialog.close();
                 setTheGridItems();
@@ -225,5 +228,11 @@ public class LashesView extends Div {
         Button cancelButton = new Button("Cancel", event -> dialog.close());
         dialog.add(new Div(confirmButton, cancelButton));
 
+    }
+
+    private void updateCustomerRepo() {
+        Map<String, Object> partialUpdateMap = new HashMap<>();
+        partialUpdateMap.put("lashesList", customer.getLashesList());
+        customerService.partialUpdate(customer, partialUpdateMap);
     }
 }
