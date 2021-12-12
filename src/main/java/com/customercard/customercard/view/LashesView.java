@@ -3,6 +3,7 @@ package com.customercard.customercard.view;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.model.Lashes;
+import com.customercard.customercard.model.dto.CustomerGeneralDto;
 import com.customercard.customercard.model.dto.LashesDto;
 import com.customercard.customercard.service.*;
 import com.vaadin.flow.component.Key;
@@ -11,6 +12,7 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -26,6 +28,10 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,11 +81,26 @@ public class LashesView extends Div {
         theInnerGrid = new Grid<>(LashesDto.class);
         setTheGridItems();
         theInnerGrid.removeColumnByKey("id");
+        theInnerGrid.removeColumnByKey("date");
+        theInnerGrid.removeColumnByKey("nextDate");
+        theInnerGrid.setColumns("style", "method", "color", "comment");
 
-        theInnerGrid.setColumns("style", "method", "color", "comment", "date", "nextDate");
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
-        theInnerGrid.addComponentColumn(it -> getEditButton(it.getId()));
-        theInnerGrid.addComponentColumn(it -> getRemoveButton(it.getId()));
+        theInnerGrid.addColumn(it ->
+                        formatter.format(it.getDate())
+                )
+                .setComparator(LashesDto::getDate)
+                .setHeader("Date");
+
+        theInnerGrid.addColumn(it ->
+                        formatter.format(it.getNextDate())
+                )
+                .setComparator(LashesDto::getNextDate)
+                .setHeader("Next Date");
+
+        theInnerGrid.addComponentColumn(it -> getEditButton(it.getId())).setHeader("Edit");
+        theInnerGrid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
     }
 
     private void setTheGridItems() {
@@ -211,11 +232,15 @@ public class LashesView extends Div {
         TextArea commentField = new TextArea("Comment");
         commentField.getStyle().set("maxHeight", "150px");
 
-        DatePicker dateField = new DatePicker("Date");
-        dateField.setValue(LocalDate.now());
+        DateTimePicker dateField = new DateTimePicker("Date");
+        dateField.setValue(LocalDateTime.now());
+        dateField.setDatePlaceholder("Date");
+        dateField.setTimePlaceholder("Time");
 
-        DatePicker nextDateField = new DatePicker("Next date");
-        nextDateField.setValue(LocalDate.now().plusWeeks(2));
+        DateTimePicker nextDateField = new DateTimePicker("Next date");
+        nextDateField.setValue(LocalDateTime.now().plusWeeks(2));
+        nextDateField.setDatePlaceholder("Date");
+        nextDateField.setTimePlaceholder("Time");
 
         if (!id.equals("")) {
             Lashes theLashes = service.getAll(id, "").get(0);

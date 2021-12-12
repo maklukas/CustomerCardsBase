@@ -25,6 +25,9 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.modelmapper.ModelMapper;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Objects;
 
 @Route(value = "", layout = MainLayout.class)
@@ -222,10 +225,16 @@ public class CustomerView extends VerticalLayout {
         theGrid = new Grid<>(CustomerGeneralDto.class);
         getTheGridItems();
         theGrid.removeColumnByKey("id");
-
+        theGrid.removeColumnByKey("lastDate");
         theGrid.addItemClickListener(it -> createLashesPopup(it.getItem().getId()));
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault());
 
-        theGrid.setColumns("name", "surname", "lastDate", "totalWorks");
+        theGrid.setColumns("name", "surname", "totalWorks");
+        theGrid.addColumn(it ->
+                formatter.format(it.getLastDate())
+                )
+                .setComparator(CustomerGeneralDto::getLastDate)
+                .setHeader("Last Date");
         theGrid.addComponentColumn(it -> getEditButton(it.getId())).setHeader("Edit");
         theGrid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
     }

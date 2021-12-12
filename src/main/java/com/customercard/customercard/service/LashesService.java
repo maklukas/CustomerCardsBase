@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -77,10 +78,10 @@ public class LashesService {
 
     private void setDates(Lashes lashes) {
         if (lashes.getDate() == null) {
-            lashes.setDate(LocalDate.now());
+            lashes.setDate(LocalDateTime.now());
         }
         if (lashes.getNextDate() == null) {
-            lashes.setNextDate(LocalDate.now().plusWeeks(2));
+            lashes.setNextDate(LocalDateTime.now().plusWeeks(2));
         }
     }
 
@@ -116,10 +117,10 @@ public class LashesService {
             lashes.setComment((String) updates.get("comment"));
         }
         if (updates.containsKey("date")) {
-            lashes.setDate((LocalDate) updates.get("date"));
+            lashes.setDate((LocalDateTime) updates.get("date"));
         }
         if (updates.containsKey("nextDate")) {
-            lashes.setNextDate((LocalDate) updates.get("nextDate"));
+            lashes.setNextDate((LocalDateTime) updates.get("nextDate"));
         }
         update(lashes);
         return true;

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
@@ -90,15 +91,15 @@ public class CustomerService {
         return numWorks;
     }
 
-    public LocalDate getLastWorkDate(@NotNull Customer customer) {
-        LocalDate lastDate = null;
+    public LocalDateTime getLastWorkDate(@NotNull Customer customer) {
+        LocalDateTime lastDate = null;
 
         if (customer.getLashesList() != null && customer.getLashesList().size() > 0) {
             lastDate = customer
                     .getLashesList()
                     .stream()
                     .map(Lashes::getDate)
-                    .reduce(LocalDate.MIN,
+                    .reduce(LocalDateTime.MIN,
                             BinaryOperator.maxBy(Comparator.nullsLast(Comparator.naturalOrder())));
         }
 
@@ -192,8 +193,8 @@ public class CustomerService {
 
         return allNextWorks.stream()
                 .filter(customerWork ->
-                        customerWork.getDate().isAfter(LocalDate.now().minusDays(1))
-                                && customerWork.getDate().isBefore(LocalDate.now().plusWeeks(1)))
+                        customerWork.getDate().isAfter(LocalDateTime.now().minusDays(1))
+                                && customerWork.getDate().isBefore(LocalDateTime.now().plusWeeks(1)))
                 .collect(Collectors.toList());
     }
 
