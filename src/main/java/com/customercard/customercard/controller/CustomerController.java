@@ -4,6 +4,7 @@ import com.customercard.customercard.mapper.CustomerGeneralMapper;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.dto.CustomerDto;
 import com.customercard.customercard.model.dto.CustomerGeneralDto;
+import com.customercard.customercard.model.dto.CustomerWork;
 import com.customercard.customercard.service.CustomerService;
 import com.googlecode.gentyref.TypeToken;
 import org.modelmapper.ModelMapper;
@@ -43,6 +44,13 @@ public class CustomerController {
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
         return customerGeneralMapper.mapModelListToDtoList(customerService.getAll(id, txt));
+    }
+
+    @GetMapping("/next")
+    public List<CustomerWork> getCustomerNext(
+            @RequestParam(required = false, value = "id") String id,
+            @RequestParam(required = false, value = "name") String name) {
+        return customerService.getNextWeekWorks(id, name);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

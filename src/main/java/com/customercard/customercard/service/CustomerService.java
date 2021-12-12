@@ -3,6 +3,7 @@ package com.customercard.customercard.service;
 import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Lashes;
+import com.customercard.customercard.model.dto.CustomerWork;
 import com.customercard.customercard.repository.CustomerRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -156,5 +157,45 @@ public class CustomerService {
             customer.setContact(contactService.create(customer.getContact()));
         }
     }
+
+    public List<CustomerWork> getAllNextWorks() {
+        List<Customer> allCustomers = getAll();
+        List<CustomerWork> customerWorks = new ArrayList<>();
+
+        for (Customer c: allCustomers) {
+            if (c.getLashesList().size() > 0) {
+                for (Lashes l: c.getLashesList()) {
+                    customerWorks.add(new CustomerWork(c.getId(), c.getName(), c.getSurname(), l.getNextDate()));
+                }
+            }
+        }
+        return customerWorks;
+    }
+
+    public List<CustomerWork> getNextWeekWorks(@Nullable String id, @Nullable String name) {
+        List<CustomerWork> allNextWorks = getAllNextWorks();
+        Collections.sort(allNextWorks);
+
+        if (id != null && !id.equals("")) {
+            allNextWorks = allNextWorks.stream()
+                    .filter(customerWork -> customerWork.getId().equals(id))
+                    .collect(Collectors.toList());
+        }
+
+        if (name != null && !name.equals("")) {
+            allNextWorks = allNextWorks.stream()
+                    .filter(customerWork ->
+                            StringUtils.containsIgnoreCase(customerWork.getName(), name) ||
+                                    StringUtils.containsIgnoreCase(customerWork.getSurname(), name))
+                    .collect(Collectors.toList());
+        }
+
+        return allNextWorks.stream()
+                .filter(customerWork ->
+                        customerWork.getDate().isAfter(LocalDate.now().minusDays(1))
+                                && customerWork.getDate().isBefore(LocalDate.now().plusWeeks(1)))
+                .collect(Collectors.toList());
+    }
+
 
 }
