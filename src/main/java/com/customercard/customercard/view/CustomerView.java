@@ -4,13 +4,11 @@ import com.customercard.customercard.mapper.CustomerGeneralMapper;
 import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.dto.CustomerGeneralDto;
-import com.customercard.customercard.service.CustomerService;
-import com.customercard.customercard.service.LashesService;
+import com.customercard.customercard.service.*;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -33,19 +31,31 @@ import java.util.Objects;
 @PageTitle("Customers | Lashes")
 public class CustomerView extends VerticalLayout {
 
-    private final CustomerService service;
+    private final CustomerService customerService;
     private final LashesService lashesService;
+    private final StyleService styleService;
+    private final MethodService methodService;
+    private final ColorService colorService;
     private final CustomerGeneralMapper customerGeneralMapper;
     private final ModelMapper mapper;
     private String findValue;
     private Grid<CustomerGeneralDto> theGrid;
 
 
-    public CustomerView(CustomerService service, CustomerGeneralMapper customerGeneralMapper, ModelMapper mapper, LashesService lashesService) {
-        this.service = service;
+    public CustomerView(CustomerService customerService,
+                        CustomerGeneralMapper customerGeneralMapper,
+                        ModelMapper mapper,
+                        LashesService lashesService,
+                        StyleService styleService,
+                        MethodService methodService,
+                        ColorService colorService) {
+        this.customerService = customerService;
         this.customerGeneralMapper = customerGeneralMapper;
         this.mapper = mapper;
         this.lashesService = lashesService;
+        this.styleService = styleService;
+        this.methodService = methodService;
+        this.colorService = colorService;
         initTheGrid();
         add(getFindTextFieldComponent(), getCreateButton());
         add(theGrid);
@@ -99,7 +109,7 @@ public class CustomerView extends VerticalLayout {
         TextField cityField = new TextField("City");
 
         if (!id.equals("")) {
-            Customer theCustomer = service.getAll(id, "").get(0);
+            Customer theCustomer = customerService.getAll(id, "").get(0);
 
             firstNameField.setValue(getValueOrReturnEmpty(theCustomer.getName()));
             surnameField.setValue(getValueOrReturnEmpty(theCustomer.getSurname()));
@@ -149,10 +159,10 @@ public class CustomerView extends VerticalLayout {
                         ));
 
                 if (id.equals("")) {
-                    service.create(customer);
+                    customerService.create(customer);
                 } else {
                     customer.setId(id);
-                    service.update(customer);
+                    customerService.update(customer);
                 }
 
                 createdNote.open();
@@ -197,7 +207,7 @@ public class CustomerView extends VerticalLayout {
         Notification deletedNote = new Notification("Deleted", 3000);
 
         Button confirmButton = new Button("Confirm", event -> {
-            service.delete(id);
+            customerService.delete(id);
             deletedNote.open();
             dialog.close();
             getTheGridItems();
@@ -221,7 +231,7 @@ public class CustomerView extends VerticalLayout {
     }
 
     private void getTheGridItems() {
-        theGrid.setItems(customerGeneralMapper.mapModelListToDtoList(service.getAll(null, findValue)));
+        theGrid.setItems(customerGeneralMapper.mapModelListToDtoList(customerService.getAll(null, findValue)));
     }
 
     private void createLashesPopup(String id) {
@@ -232,7 +242,7 @@ public class CustomerView extends VerticalLayout {
 
         lashesDialog.setWidthFull();
         lashesDialog.open();
-        LashesView lashesView = new LashesView(lashesService, mapper, service.getById(id), service);
+        LashesView lashesView = new LashesView(lashesService, mapper, customerService.getById(id), customerService, styleService, methodService, colorService);
         lashesDialog.add(lashesView);
 
         Button closeButton = new Button("Close", event ->

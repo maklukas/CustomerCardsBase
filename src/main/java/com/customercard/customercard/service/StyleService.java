@@ -102,6 +102,9 @@ public class StyleService implements DictionaryService {
         if (repo.findByName(style.getName()).size() > 0) {
             LOGGER.info("Style already exists.");
             return true;
+        } else if (style.getName() == null || style.getName().equals("")) {
+            LOGGER.info("Empty style passed.");
+            return true;
         }
         return false;
     }

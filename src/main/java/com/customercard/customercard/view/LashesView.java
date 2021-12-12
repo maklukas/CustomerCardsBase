@@ -1,16 +1,15 @@
 package com.customercard.customercard.view;
 
-import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
+import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.model.Lashes;
 import com.customercard.customercard.model.dto.LashesDto;
-import com.customercard.customercard.service.CustomerService;
-import com.customercard.customercard.service.LashesService;
+import com.customercard.customercard.service.*;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -22,6 +21,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import org.jetbrains.annotations.Nullable;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 
@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class LashesView extends Div {
 
@@ -36,15 +37,27 @@ public class LashesView extends Div {
     private final ModelMapper mapper;
     private final CustomerService customerService;
     private final Customer customer;
+    private final StyleService styleService;
+    private final MethodService methodService;
+    private final ColorService colorService;
 
     private Grid<LashesDto> theInnerGrid;
     private String findInnerValue;
 
-    public LashesView(LashesService service, ModelMapper mapper, Customer customer, CustomerService customerService) {
+    public LashesView(LashesService service,
+                      ModelMapper mapper,
+                      Customer customer,
+                      CustomerService customerService,
+                      StyleService styleService,
+                      MethodService methodService,
+                      ColorService colorService) {
         this.service = service;
         this.mapper = mapper;
         this.customer = customer;
         this.customerService = customerService;
+        this.styleService = styleService;
+        this.methodService = methodService;
+        this.colorService = colorService;
         openLashesPopup();
     }
 
@@ -141,20 +154,59 @@ public class LashesView extends Div {
         popupCreate("");
     }
 
+
+    private void setUpComboBox(ComboBox<String> comboBox, List<String> items) {
+        comboBox.setAllowCustomValue(true);
+        setComboBoxItems(comboBox, items);
+    }
+
+    private void setComboBoxItems(ComboBox<String> comboBox, List<String> items) {
+        comboBox.addCustomValueSetListener(e -> {
+            String customValue = e.getDetail();
+            if (items.contains(customValue)) return;
+            items.add(customValue);
+            comboBox.setItems(items);
+            comboBox.setValue(customValue);
+        });
+        comboBox.setItems(items);
+    }
+
+    private List<String> getStylesList() {
+        return styleService.getAll().stream()
+                .map(Dictionary::getName)
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getMethodsList() {
+        return methodService.getAll().stream()
+                .map(Dictionary::getName)
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getColorsList() {
+        return colorService.getAll().stream()
+                .map(Dictionary::getName)
+                .collect(Collectors.toList());
+    }
+
     public void popupCreate(String id) {
 
         Dialog dialog = new Dialog();
         dialog.open();
 
         FormLayout formLayout = new FormLayout();
-        TextField styleField = new TextField("Style");
-        styleField.setMinLength(1);
 
-        TextField methodField = new TextField("Method");
-        methodField.setMinLength(1);
+        List<String> stylesList = getStylesList();
+        ComboBox<String> styleComboBox = new ComboBox<>("Style");
+        setUpComboBox(styleComboBox, stylesList);
 
-        TextField colorField = new TextField("Color");
-        colorField.setMinLength(1);
+        List<String> methodList = getMethodsList();
+        ComboBox<String> methodComboBox = new ComboBox<>("Method");
+        setUpComboBox(methodComboBox, methodList);
+
+        List<String> colorList = getColorsList();
+        ComboBox<String> colorComboBox = new ComboBox<>("Color");
+        setUpComboBox(colorComboBox, colorList);
 
         TextArea commentField = new TextArea("Comment");
         commentField.getStyle().set("maxHeight", "150px");
@@ -168,19 +220,20 @@ public class LashesView extends Div {
         if (!id.equals("")) {
             Lashes theLashes = service.getAll(id, "").get(0);
 
-            styleField.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getStyle()));
-            methodField.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getMethod()));
-            colorField.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getColor()));
+
+            styleComboBox.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getStyle()));
+            methodComboBox.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getMethod()));
+            colorComboBox.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getColor()));
+
             commentField.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getComment()));
             dateField.setValue(theLashes.getDate());
             nextDateField.setValue(theLashes.getNextDate());
-
         }
 
         formLayout.add(
-                styleField,
-                methodField,
-                colorField,
+                styleComboBox,
+                methodComboBox,
+                colorComboBox,
                 commentField,
                 dateField,
                 nextDateField
@@ -196,12 +249,12 @@ public class LashesView extends Div {
 
         Button confirmButton = new Button("Confirm", event -> {
 
-            if (!styleField.isEmpty() || !methodField.isEmpty() || !colorField.isEmpty() || !commentField.isEmpty()) {
+            if (!styleComboBox.isEmpty() || !methodComboBox.isEmpty() || !colorComboBox.isEmpty() || !commentField.isEmpty()) {
 
                 Lashes lashes = new Lashes();
-                lashes.setStyle(styleField.getValue());
-                lashes.setMethod(methodField.getValue());
-                lashes.setColor(colorField.getValue());
+                lashes.setStyle(styleComboBox.getValue());
+                lashes.setMethod(methodComboBox.getValue());
+                lashes.setColor(colorComboBox.getValue());
                 lashes.setComment(commentField.getValue());
                 lashes.setDate(dateField.getValue());
                 lashes.setNextDate(nextDateField.getValue());
