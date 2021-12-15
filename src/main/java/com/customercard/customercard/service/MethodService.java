@@ -102,6 +102,9 @@ public class MethodService implements DictionaryService {
         if (repo.findByName(method.getName()).size() > 0) {
             LOGGER.info("Method already exists.");
             return true;
+        } else if (method.getName() == null || method.getName().equals("")){
+            LOGGER.info("Empty method passed.");
+            return true;
         }
         return false;
     }

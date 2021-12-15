@@ -24,18 +24,18 @@ public class ContactService {
         this.repo = repo;
     }
 
-    public List<Contact> getAllContacts() {
+    public List<Contact> getAll() {
         LOGGER.info("All contacts fetched.");
         return repo.findAll();
     }
 
-    public Contact getContactById(@Nullable String id) {
+    public Contact getById(@Nullable String id) {
         LOGGER.info("Contact fetched by id.");
         assert id != null;
         return repo.findById(id).orElse(new Contact());
     }
 
-    public List<Contact> getContactByName(@Nullable String txt) {
+    public List<Contact> getByName(@Nullable String txt) {
         LOGGER.info("All fetched by name.");
         return repo.findAll()
                 .stream()
@@ -47,17 +47,17 @@ public class ContactService {
                 .collect(Collectors.toList());
     }
 
-    public List<Contact> getContacts(@Nullable String id, @Nullable String txt) {
+    public List<Contact> getAll(@Nullable String id, @Nullable String txt) {
         if (id != null) {
-            return List.of(getContactById(id));
+            return List.of(getById(id));
         } else if (txt != null) {
-            return getContactByName(txt);
+            return getByName(txt);
         } else {
-            return getAllContacts();
+            return getAll();
         }
     }
 
-    public Contact createContact(Contact contact) {
+    public Contact create(Contact contact) {
 
         if (validateIfExists(contact)) {
             return findFirstEqual(contact);
@@ -67,7 +67,7 @@ public class ContactService {
         return repo.save(contact);
     }
 
-    public Contact updateContact(Contact contact) {
+    public Contact update(Contact contact) {
 
         if (validateIfExists(contact)) {
             return findFirstEqual(contact);
@@ -77,7 +77,7 @@ public class ContactService {
         return repo.save(contact);
     }
 
-    public boolean deleteContact(String id) {
+    public boolean delete(String id) {
         LOGGER.info("Contact deleted.");
         repo.deleteById(id);
         return true;
@@ -100,7 +100,7 @@ public class ContactService {
         if (updates.containsKey("boxOffice")) {
             contact.setBoxOffice((String) updates.get("boxOffice"));
         }
-        updateContact(contact);
+        update(contact);
         return true;
     }
 

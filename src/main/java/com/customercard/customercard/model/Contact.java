@@ -1,5 +1,6 @@
 package com.customercard.customercard.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
 public class Contact extends AbstractEntity {
 
     private String phoneNumber;

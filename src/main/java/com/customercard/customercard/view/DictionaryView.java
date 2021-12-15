@@ -4,7 +4,9 @@ import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.service.DictionaryService;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
@@ -27,72 +29,46 @@ public abstract class DictionaryView extends VerticalLayout {
     public DictionaryView(DictionaryService service, ModelMapper mapper) {
         this.service = service;
         this.mapper = mapper;
-        add(getFindTextFieldComponent(), plusIconComponent());
-        add(getTheGrid());
+        initTheGrid();
+        add(getFindTextFieldComponent(), getCreateButton());
+        add(theGrid);
     }
 
     private TextField getFindTextFieldComponent() {
-        TextField textField = new TextField();
-        textField.setPlaceholder("Search");
+        TextField findTextField = new TextField();
+        findTextField.setPlaceholder("Search");
+        findTextField.setClearButtonVisible(true);
         Icon icon = VaadinIcon.SEARCH.create();
-        textField.setPrefixComponent(icon);
+        findTextField.setPrefixComponent(icon);
 
-        textField.addValueChangeListener(it -> {
+        findTextField.addValueChangeListener(it -> {
             findValue = it.getValue();
             if (findValue.equals("")) {
                 findValue = null;
             }
-            getTheGrid();
+            setTheGridItems();
         });
 
-        textField.setValueChangeMode(ValueChangeMode.EAGER);
+        findTextField.setValueChangeMode(ValueChangeMode.EAGER);
 
-        return textField;
+        return findTextField;
     }
 
-    public Icon plusIconComponent() {
-        Icon icon = new Icon(VaadinIcon.PLUS_CIRCLE);
-        String mouseOutColor = "#0006c7";
-        icon.setColor(mouseOutColor);
-        icon.addClickListener(it -> popupCreate());
+    public void initTheGrid() {
+        theGrid = new Grid<>(Dictionary.class);
+        setTheGridItems();
+        theGrid.removeColumnByKey("id");
+        theGrid.setColumns("name");
+        Grid.Column<Dictionary> removeCol = theGrid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
 
-        icon.getElement().addEventListener("mouseover", it -> icon.setColor("#0007f2"));
-        icon.getElement().addEventListener("mouseout", it -> icon.setColor(mouseOutColor));
+        removeCol.setTextAlign(ColumnTextAlign.CENTER);
 
-        return icon;
     }
 
-    private Grid<Dictionary> getTheGrid() {
-        Grid<Dictionary> grid = new Grid<>(Dictionary.class);
+    private void setTheGridItems() {
         List<Dictionary> dictionaries = mapper.map(service.getAll(null, findValue), new TypeToken<List<Dictionary>>() {
             }.getType());
-        grid.setItems(dictionaries);
-
-        grid.removeColumnByKey("id");
-        grid.setColumns("name");
-        grid.addComponentColumn(it -> getRemoveIcon(it.getId()));
-
-        if (theGrid != null) {
-            int oldId = indexOf(theGrid);
-            remove(theGrid);
-            addComponentAtIndex(oldId, grid);
-        }
-
-        theGrid = grid;
-        return grid;
-    }
-
-    public Icon getRemoveIcon(String id) {
-        Icon removeIcon = new Icon(VaadinIcon.MINUS_CIRCLE);
-        String mouseOutColor = "#c70000";
-        removeIcon.setColor(mouseOutColor);
-        removeIcon.addClickListener(it -> removePopupCreate(id));
-
-        removeIcon.getElement().getStyle().set("vertical-align", "right");
-        removeIcon.getElement().addEventListener("mouseover", it -> removeIcon.setColor("#ff0303"));
-        removeIcon.getElement().addEventListener("mouseout", it -> removeIcon.setColor(mouseOutColor));
-
-        return removeIcon;
+        theGrid.setItems(dictionaries);
     }
 
     public void removePopupCreate(String id) {
@@ -107,7 +83,7 @@ public abstract class DictionaryView extends VerticalLayout {
             service.delete(id);
             deletedNote.open();
             dialog.close();
-            getTheGrid();
+            setTheGridItems();
         });
 
         Shortcuts.addShortcutListener(dialog, confirmButton::click, Key.ENTER);
@@ -133,13 +109,27 @@ public abstract class DictionaryView extends VerticalLayout {
                 service.create(getObject(textField.getValue()));
                 createdNote.open();
                 dialog.close();
-                getTheGrid();
+                setTheGridItems();
             }
         });
 
         Shortcuts.addShortcutListener(dialog, confirmButton::click, Key.ENTER);
         Button cancelButton = new Button("Cancel", event -> dialog.close());
         dialog.add(new Div(confirmButton, cancelButton));
+    }
+
+    public Button getCreateButton() {
+        Button icon = new Button();
+        ComponentStyle.setCreateButtonStyle(icon);
+        icon.addClickListener(it -> popupCreate());
+        return icon;
+    }
+
+    public Button getRemoveButton(String id) {
+        Button removeButton = new Button();
+        ComponentStyle.setRemoveButtonStyle(removeButton);
+        removeButton.addClickListener(it -> removePopupCreate(id));
+        return removeButton;
     }
 
         public abstract Dictionary getObject(String name);

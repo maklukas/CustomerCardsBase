@@ -103,6 +103,9 @@ public class ColorService implements DictionaryService {
         if (repo.findByName(color.getName()).size() > 0) {
             LOGGER.info("Color already exists.");
             return true;
+        } else if (color.getName() == null || color.getName().equals("")) {
+            LOGGER.info("Empty color passed.");
+            return true;
         }
         return false;
     }

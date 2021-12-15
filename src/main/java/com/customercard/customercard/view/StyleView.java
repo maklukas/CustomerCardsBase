@@ -12,19 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PageTitle("Styles | Lashes")
 public class StyleView extends DictionaryView {
 
-    private final StyleService service;
-    private final ModelMapper mapper;
-
     @Autowired
     public StyleView(StyleService service, ModelMapper mapper) {
         super(service, mapper);
-        this.service = service;
-        this.mapper = mapper;
     }
 
     @Override
     public Dictionary getObject(String name) {
         return new Style(name);
     }
-
 }

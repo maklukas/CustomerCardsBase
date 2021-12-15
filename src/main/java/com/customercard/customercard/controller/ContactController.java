@@ -31,28 +31,28 @@ public class ContactController {
     public List<ContactDto> getContact(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.map(contactService.getContacts(id, txt), new TypeToken<List<ContactDto>>() {
+        return mapper.map(contactService.getAll(id, txt), new TypeToken<List<ContactDto>>() {
         }.getType());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void createContact(@RequestBody ContactDto contact) {
-        contactService.createContact(mapper.map(contact, Contact.class));
+        contactService.create(mapper.map(contact, Contact.class));
     }
 
     @DeleteMapping("/{id}")
     public void deleteContact(@PathVariable String id) {
-        contactService.deleteContact(id);
+        contactService.delete(id);
     }
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public void updateContact(@RequestBody ContactDto contact) {
-        contactService.updateContact(mapper.map(contact, Contact.class));
+        contactService.update(mapper.map(contact, Contact.class));
     }
 
     @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
     public void partialUpdate(@RequestParam String id, @RequestBody Map<String, Object> updates) {
-        Contact contact = contactService.getContactById(id);
+        Contact contact = contactService.getById(id);
         contactService.partialUpdate(contact, updates);
     }
 }

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -17,6 +18,6 @@ public class LashesDto {
     private String method;
     private String color;
     private String comment;
-    private LocalDate date;
-    private LocalDate nextDate;
+    private LocalDateTime date;
+    private LocalDateTime nextDate;
 }

@@ -11,14 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Route(value = "/colors", layout = MainLayout.class)
 @PageTitle("Colors | Lashes")
 public class ColorsView extends DictionaryView {
-    private final ColorService service;
-    private final ModelMapper mapper;
 
     @Autowired
     public ColorsView(ColorService service, ModelMapper mapper) {
         super(service, mapper);
-        this.service = service;
-        this.mapper = mapper;
     }
 
     @Override

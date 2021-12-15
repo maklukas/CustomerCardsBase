@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,12 +13,16 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomerGeneralDto {
+public class CustomerWork implements Comparable<CustomerWork> {
 
     private String id;
     private String name;
     private String surname;
-    private LocalDateTime lastDate;
-    private int totalWorks;
+    private LocalDateTime date;
 
+    @Override
+    public int compareTo(@NotNull CustomerWork o) {
+        if (getDate() == null || o.getDate() == null) return 0;
+        return getDate().compareTo(o.getDate());
+    }
 }

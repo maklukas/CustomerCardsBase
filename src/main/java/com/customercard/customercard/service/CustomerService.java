@@ -3,6 +3,7 @@ package com.customercard.customercard.service;
 import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Lashes;
+import com.customercard.customercard.model.dto.CustomerWork;
 import com.customercard.customercard.repository.CustomerRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
@@ -32,25 +34,25 @@ public class CustomerService {
         this.contactService = contactService;
     }
 
-    public Customer createCustomer(Customer customer) {
+    public Customer create(Customer customer) {
         LOGGER.info("Customer added.");
         createSubClasses(customer);
         return repo.save(customer);
     }
 
-    public Customer updateCustomer(Customer customer) {
+    public Customer update(Customer customer) {
         createSubClasses(customer);
         LOGGER.info("Customer updated.");
         return repo.save(customer);
     }
 
-    public boolean deleteCustomer(String id) {
+    public boolean delete(String id) {
         repo.deleteById(id);
         LOGGER.info("Customer deleted.");
         return true;
     }
 
-    public List<Customer> getAllCustomers() {
+    public List<Customer> getAll() {
         LOGGER.info("Customers fetched.");
         return repo.findAll();
     }
@@ -69,13 +71,13 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
-    public List<Customer> getCustomers(@Nullable String id, @Nullable String txt) {
+    public List<Customer> getAll(@Nullable String id, @Nullable String txt) {
         if (id != null) {
             return List.of(getById(id));
         } else if (txt != null) {
             return getByNameFragment(txt);
         } else {
-            return getAllCustomers();
+            return getAll();
         }
     }
 
@@ -89,15 +91,15 @@ public class CustomerService {
         return numWorks;
     }
 
-    public LocalDate getLastWorkDate(@NotNull Customer customer) {
-        LocalDate lastDate = null;
+    public LocalDateTime getLastWorkDate(@NotNull Customer customer) {
+        LocalDateTime lastDate = null;
 
-        if (customer.getLashesList() != null) {
+        if (customer.getLashesList() != null && customer.getLashesList().size() > 0) {
             lastDate = customer
                     .getLashesList()
                     .stream()
                     .map(Lashes::getDate)
-                    .reduce(LocalDate.MIN,
+                    .reduce(LocalDateTime.MIN,
                             BinaryOperator.maxBy(Comparator.nullsLast(Comparator.naturalOrder())));
         }
 
@@ -118,10 +120,15 @@ public class CustomerService {
             customer.setContact((Contact) updates.get("contact"));
         }
         if (updates.containsKey("lashesList")) {
-            customer.setLashesList(List.of((Lashes) updates.get("lashesList")));
+            customer.setLashesList(cast(updates.get("lashesList")));
         }
-        updateCustomer(customer);
+        update(customer);
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends List<?>> T cast(Object obj) {
+        return (T) obj;
     }
 
     private void createSubClasses(Customer customer) {
@@ -139,7 +146,7 @@ public class CustomerService {
 
         if (lashesList.size() > 0) {
             for (Lashes theLash: lashesList) {
-                newList.add(lashesService.createLashes(theLash));
+                newList.add(lashesService.create(theLash));
             }
         }
 
@@ -148,8 +155,48 @@ public class CustomerService {
 
     private void createContact(Customer customer) {
         if (customer.getContact() != null) {
-            customer.setContact(contactService.createContact(customer.getContact()));
+            customer.setContact(contactService.create(customer.getContact()));
         }
     }
+
+    public List<CustomerWork> getAllNextWorks() {
+        List<Customer> allCustomers = getAll();
+        List<CustomerWork> customerWorks = new ArrayList<>();
+
+        for (Customer c: allCustomers) {
+            if (c.getLashesList().size() > 0) {
+                for (Lashes l: c.getLashesList()) {
+                    customerWorks.add(new CustomerWork(c.getId(), c.getName(), c.getSurname(), l.getNextDate()));
+                }
+            }
+        }
+        return customerWorks;
+    }
+
+    public List<CustomerWork> getNextWeekWorks(@Nullable String id, @Nullable String name) {
+        List<CustomerWork> allNextWorks = getAllNextWorks();
+        Collections.sort(allNextWorks);
+
+        if (id != null && !id.equals("")) {
+            allNextWorks = allNextWorks.stream()
+                    .filter(customerWork -> customerWork.getId().equals(id))
+                    .collect(Collectors.toList());
+        }
+
+        if (name != null && !name.equals("")) {
+            allNextWorks = allNextWorks.stream()
+                    .filter(customerWork ->
+                            StringUtils.containsIgnoreCase(customerWork.getName(), name) ||
+                                    StringUtils.containsIgnoreCase(customerWork.getSurname(), name))
+                    .collect(Collectors.toList());
+        }
+
+        return allNextWorks.stream()
+                .filter(customerWork ->
+                        customerWork.getDate().isAfter(LocalDateTime.now().minusDays(1))
+                                && customerWork.getDate().isBefore(LocalDateTime.now().plusWeeks(1)))
+                .collect(Collectors.toList());
+    }
+
 
 }

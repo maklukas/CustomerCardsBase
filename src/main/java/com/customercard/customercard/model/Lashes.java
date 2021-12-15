@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Document("lashes")
@@ -22,8 +23,8 @@ public class Lashes extends AbstractEntity {
     private String method;
     private String color;
     private String comment;
-    private LocalDate date;
-    private LocalDate nextDate;
+    private LocalDateTime date;
+    private LocalDateTime nextDate;
 
     @Override
     public boolean equals(Object o) {
