@@ -1,5 +1,6 @@
 package com.customercard.customercard.service;
 
+import com.customercard.customercard.mapper.CustomerGeneralMapper;
 import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Lashes;
@@ -11,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -173,7 +176,7 @@ public class CustomerService {
         return customerWorks;
     }
 
-    public List<CustomerWork> getNextWeekWorks(@Nullable String id, @Nullable String name) {
+    public List<CustomerWork> getNextWorks(@Nullable String id, @Nullable String name) {
         List<CustomerWork> allNextWorks = getAllNextWorks();
         Collections.sort(allNextWorks);
 
@@ -193,9 +196,26 @@ public class CustomerService {
 
         return allNextWorks.stream()
                 .filter(customerWork ->
-                        customerWork.getDate().isAfter(LocalDateTime.now().minusDays(1))
-                                && customerWork.getDate().isBefore(LocalDateTime.now().plusWeeks(1)))
+                        customerWork.getDate().isAfter(LocalDateTime.now().minusDays(1)))
                 .collect(Collectors.toList());
+    }
+
+
+    public List<CustomerWork> getWorksAtDate(LocalDate date) {
+        List<Customer> allCustomers = repo.findAllBetweenDates(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+
+        List<CustomerWork> allNextWorks = new ArrayList<>();
+
+        for (Customer c: allCustomers) {
+            if (c.getLashesList().size() > 0) {
+                for (Lashes l: c.getLashesList()) {
+                    allNextWorks.add(new CustomerWork(c.getId(), c.getName(), c.getSurname(), l.getNextDate()));
+                }
+            }
+        }
+        Collections.sort(allNextWorks);
+
+        return allNextWorks;
     }
 
 

@@ -67,6 +67,7 @@ public class MainLayout extends AppLayout {
         Tabs tabs = new Tabs();
         tabs.add(
                 createTab(VaadinIcon.USER_HEART, "Customers", CustomerView.class),
+                createTab(VaadinIcon.TASKS, "Plan", PlanView.class),
                 createTab(VaadinIcon.FLASH, "Colors", ColorsView.class),
                 createTab(VaadinIcon.DIAMOND, "Styles", StyleView.class),
                 createTab(VaadinIcon.COG, "Methods", MethodView.class)

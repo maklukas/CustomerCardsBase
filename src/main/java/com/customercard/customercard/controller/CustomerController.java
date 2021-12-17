@@ -50,7 +50,7 @@ public class CustomerController {
     public List<CustomerWork> getCustomerNext(
             @RequestParam(required = false, value = "id") String id,
             @RequestParam(required = false, value = "name") String name) {
-        return customerService.getNextWeekWorks(id, name);
+        return customerService.getNextWorks(id, name);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
