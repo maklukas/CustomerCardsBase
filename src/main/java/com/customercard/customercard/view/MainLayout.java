@@ -38,7 +38,7 @@ public class MainLayout extends AppLayout {
 
         Div b = new Div();
         b.add(toggleButton);
-        ComponentStyle.setDivAliginToRightStyle(b);
+        ComponentStyle.setDivAlignToRightStyle(b);
         addToNavbar(b);
 
     }

@@ -6,8 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 @Getter
 @Setter
@@ -24,5 +26,11 @@ public class CustomerWork implements Comparable<CustomerWork> {
     public int compareTo(@NotNull CustomerWork o) {
         if (getDate() == null || o.getDate() == null) return 0;
         return getDate().compareTo(o.getDate());
+    }
+
+    @Override
+    public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
+        return  formatter.format(date) + " | " + name +  " " + surname;
     }
 }
