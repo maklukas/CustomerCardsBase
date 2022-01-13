@@ -31,6 +31,17 @@ public class CustomerWork implements Comparable<CustomerWork> {
     @Override
     public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
-        return  formatter.format(date) + " | " + name +  " " + surname;
+
+        String n = name;
+        if (name != null && !name.equals("")) {
+            n = n.charAt(0) + ".";
+        }
+
+        String s = surname;
+        if (surname != null && !surname.equals("")) {
+            s = " " + surname;
+        }
+
+        return formatter.format(date) + " | " + n + s;
     }
 }

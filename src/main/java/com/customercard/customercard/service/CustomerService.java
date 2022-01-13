@@ -29,12 +29,14 @@ public class CustomerService {
     private final CustomerRepo repo;
     private final LashesService lashesService;
     private final ContactService contactService;
+    private final CalendarService calendarService;
 
     @Autowired
-    public CustomerService(CustomerRepo repo, LashesService lashesService, ContactService contactService) {
+    public CustomerService(CustomerRepo repo, LashesService lashesService, ContactService contactService, CalendarService calendarService) {
         this.repo = repo;
         this.lashesService = lashesService;
         this.contactService = contactService;
+        this.calendarService = calendarService;
     }
 
     public Customer create(Customer customer) {
@@ -200,22 +202,25 @@ public class CustomerService {
                 .collect(Collectors.toList());
     }
 
+    public List<CustomerWork> getWorksInCalendarMonth(LocalDate date) {
+        LocalDate theFirstDayAtTheCalendar = calendarService.getTheDateOfFirstDayAtTheCalendar(date);
+        LocalDate theLastDayAtTheCalendar = theFirstDayAtTheCalendar.plusDays(42);
 
-    public List<CustomerWork> getWorksAtDate(LocalDate date) {
-        List<Customer> allCustomers = repo.findAllBetweenDates(date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+        List<Customer> all = getAll();
 
-        List<CustomerWork> allNextWorks = new ArrayList<>();
-
-        for (Customer c: allCustomers) {
-            if (c.getLashesList().size() > 0) {
-                for (Lashes l: c.getLashesList()) {
-                    allNextWorks.add(new CustomerWork(c.getId(), c.getName(), c.getSurname(), l.getNextDate()));
+        List<CustomerWork> works = new ArrayList<>();
+        for (Customer c: all) {
+            for (Lashes l: c.getLashesList()) {
+                if (l.getNextDate().isAfter(theFirstDayAtTheCalendar.atStartOfDay())
+                        && l.getNextDate().isBefore(theLastDayAtTheCalendar.atStartOfDay())) {
+                    works.add(new CustomerWork(c.getId(), c.getName(), c.getSurname(), l.getNextDate()));
                 }
             }
         }
-        Collections.sort(allNextWorks);
 
-        return allNextWorks;
+        Collections.sort(works);
+
+        return works;
     }
 
 

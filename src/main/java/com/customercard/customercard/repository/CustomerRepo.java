@@ -11,10 +11,4 @@ import java.util.List;
 
 @Repository
 public interface CustomerRepo extends MongoRepository<Customer, String> {
-
-    @Query(
-            value="{ 'lashesList': { $elemMatch: { 'nextDate': {$gte: ?0, $lt: ?1 } } } }",
-            fields="{ 'name': 1, 'surname': 1, 'lashesList': { $elemMatch: { 'nextDate': {$gte: ?0, $lt: ?1 } } } }"
-    )
-    List<Customer> findAllBetweenDates(LocalDateTime gte, LocalDateTime lt);
 }

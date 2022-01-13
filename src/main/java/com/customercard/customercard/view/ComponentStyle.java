@@ -67,6 +67,14 @@ public abstract class ComponentStyle {
         layout.addClassName("calendar-field");
     }
 
+    public static void setCalendarFieldTodayStyle(VerticalLayout layout) {
+        layout.addClassName("calendar-field-today");
+    }
+
+    public static void removeCalendarFieldTodayStyle(VerticalLayout layout) {
+        layout.removeClassName("calendar-field-today");
+    }
+
     public static void setCalendarHorizontals(HorizontalLayout layout) {
         layout.addClassName("calendar-horizontal-fragment");
     }

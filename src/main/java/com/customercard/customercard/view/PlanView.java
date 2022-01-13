@@ -1,6 +1,8 @@
 package com.customercard.customercard.view;
 
+import com.customercard.customercard.model.dto.CustomerWork;
 import com.customercard.customercard.service.CalendarService;
+import com.customercard.customercard.service.CustomerService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -22,22 +24,31 @@ import java.util.Locale;
 public class PlanView extends VerticalLayout {
 
     private final CalendarService service;
+    private final CustomerService customerService;
     private final List<HorizontalLayout> horizontals;
     private final List<VerticalLayout> calendarFields;
+    private List<CustomerWork> works;
     private LocalDate theDate;
-    private Span monthName;
+    private final Span monthName;
 
-    public PlanView(CalendarService service) {
+    public PlanView(CalendarService service, CustomerService customerService) {
         this.service = service;
+        this.customerService = customerService;
         theDate = service.getTheFirstDateOfTheMonth(LocalDate.now());
+        works = customerService.getWorksInCalendarMonth(theDate);
         horizontals = new ArrayList<>();
         calendarFields = new ArrayList<>();
         this.monthName = new Span();
+        initComponents();
+        setHorizontalsStyles();
+    }
+
+    private void initComponents() {
         initMonthNav();
         createGrids();
         initHeaderFields();
         initCalendarFields();
-        setHorizontalsStyles();
+        splitWorks();
     }
 
     private void initMonthNav() {
@@ -90,8 +101,10 @@ public class PlanView extends VerticalLayout {
 
         upArrowButton.addClickListener(it -> {
             theDate = theDate.minusMonths(1);
+            works = customerService.getWorksInCalendarMonth(theDate);
             setMonthNameContent();
             initCalendarFields();
+            splitWorks();
         });
         return upArrowButton;
     }
@@ -103,8 +116,10 @@ public class PlanView extends VerticalLayout {
 
         downArrowButton.addClickListener(it -> {
             theDate = theDate.plusMonths(1);
+            works = customerService.getWorksInCalendarMonth(theDate);
             setMonthNameContent();
             initCalendarFields();
+            splitWorks();
         });
         return downArrowButton;
     }
@@ -123,18 +138,17 @@ public class PlanView extends VerticalLayout {
     }
 
     private void initCalendarFields() {
-        for (int i = 7; i < 49; i++) {
-            ComponentStyle.setCalendarFieldsStyle(calendarFields.get(i));
-            fillTheCalendarFields();
-        }
-    }
-
-    private void fillTheCalendarFields() {
         LocalDate theDateOfFirstDayAtTheCalendar = service.getTheDateOfFirstDayAtTheCalendar(theDate);
 
         for (int i = 7; i < 49; i++) {
+            ComponentStyle.setCalendarFieldsStyle(calendarFields.get(i));
             removeTheLayoutContent(i);
             addTheLayoutContent(i, String.valueOf(theDateOfFirstDayAtTheCalendar.getDayOfMonth()));
+            if (theDateOfFirstDayAtTheCalendar.equals(LocalDate.now())) {
+                ComponentStyle.setCalendarFieldTodayStyle(calendarFields.get(i));
+            } else {
+                ComponentStyle.removeCalendarFieldTodayStyle(calendarFields.get(i));
+            }
             theDateOfFirstDayAtTheCalendar = theDateOfFirstDayAtTheCalendar.plusDays(1);
         }
     }
@@ -147,5 +161,11 @@ public class PlanView extends VerticalLayout {
 
     private void setMonthNameContent() {
         monthName.setText(theDate.getMonth().getDisplayName(TextStyle.FULL_STANDALONE, Locale.getDefault()) + " " + theDate.getYear());
+    }
+
+    private void splitWorks() {
+        for (CustomerWork w : works) {
+            addTheLayoutContent(service.computeFieldNumber(theDate, w.getDate().toLocalDate()), w.toString());
+        }
     }
 }
