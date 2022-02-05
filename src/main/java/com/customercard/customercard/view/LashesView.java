@@ -18,9 +18,11 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 
@@ -90,13 +92,21 @@ public class LashesView extends Div {
                 .setHeader("Date");
 
         theInnerGrid.addColumn(it ->
-                        formatter.format(it.getNextDate())
+                        setNextDateColumnValue(formatter, it)
                 )
                 .setComparator(LashesDto::getNextDate)
                 .setHeader("Next Date");
 
         theInnerGrid.addComponentColumn(it -> getEditButton(it.getId())).setHeader("Edit");
         theInnerGrid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
+    }
+
+    private String setNextDateColumnValue(DateTimeFormatter formatter, LashesDto lashes) {
+        if (lashes.getNextDate() != null) {
+            return formatter.format(lashes.getNextDate());
+        } else {
+            return "";
+        }
     }
 
     private void setTheGridItems() {

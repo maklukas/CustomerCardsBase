@@ -76,13 +76,15 @@ public class LashesService {
         return repo.save(lashes);
     }
 
+
+    //TODO test how to next date will act when i set it to null value
     private void setDates(Lashes lashes) {
         if (lashes.getDate() == null) {
             lashes.setDate(LocalDateTime.now());
         }
-        if (lashes.getNextDate() == null) {
-            lashes.setNextDate(LocalDateTime.now().plusWeeks(2));
-        }
+//        if (lashes.getNextDate() == null) {
+//            lashes.setNextDate(LocalDateTime.now().plusWeeks(2));
+//        }
     }
 
     public Lashes update(Lashes lashes) {
