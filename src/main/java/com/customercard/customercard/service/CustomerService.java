@@ -197,6 +197,7 @@ public class CustomerService {
         }
 
         return allNextWorks.stream()
+                .filter(customerWork -> customerWork.getDate() != null)
                 .filter(customerWork ->
                         customerWork.getDate().isAfter(LocalDateTime.now().minusDays(1)))
                 .collect(Collectors.toList());
@@ -211,7 +212,7 @@ public class CustomerService {
         List<CustomerWork> works = new ArrayList<>();
         for (Customer c: all) {
             for (Lashes l: c.getLashesList()) {
-                if (l.getNextDate().isAfter(theFirstDayAtTheCalendar.atStartOfDay())
+                if (l.getNextDate() != null && l.getNextDate().isAfter(theFirstDayAtTheCalendar.atStartOfDay())
                         && l.getNextDate().isBefore(theLastDayAtTheCalendar.atStartOfDay())) {
                     works.add(new CustomerWork(c.getId(), c.getName(), c.getSurname(), l.getNextDate()));
                 }
