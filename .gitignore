@@ -48,6 +48,5 @@ webpack.config.js
 webpack.generated.js
 target
 config
-frontend
 gradle
 .gitignore

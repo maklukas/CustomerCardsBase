@@ -80,9 +80,6 @@ public class LashesService {
         if (lashes.getDate() == null) {
             lashes.setDate(LocalDateTime.now());
         }
-        if (lashes.getNextDate() == null) {
-            lashes.setNextDate(LocalDateTime.now().plusWeeks(2));
-        }
     }
 
     public Lashes update(Lashes lashes) {

@@ -1,0 +1,96 @@
+
+.calendar-horizontal-fragment {
+    margin: 1.2px;
+}
+
+.calendar-field {
+    border: 1px solid var(--lumo-contrast-10pct);
+    margin: 1.2px;
+    width:10px;
+    min-width:14.3%;
+    min-height:15vh;
+    max-height:20vh;
+    padding: 10px;
+}
+
+.calendar-field-today  {
+  @extend .calendar-field;
+  border: 3px solid var(--lumo-contrast-20pct);
+}
+
+
+.calendar-field:hover {
+  background-color: var(--lumo-contrast-5pct);
+}
+
+.calendar-header {
+    background-color: var(--lumo-contrast-20pct);
+    border: 1px solid var(--lumo-contrast-10pct);
+    margin: 1.2px;
+    width:10px;
+    min-width:14.3%;
+    height: 5vh;
+}
+
+.calendar-header-text {
+    line-height: 2vh;
+    color: var(--lumo-header-text-color);
+    font-weight: 500;
+}
+
+.calendar-field-text {
+    margin-top: 2.5px;
+    margin-bottom: 2.5px;
+}
+
+/* Add media queries for smaller screens */
+
+@media screen and (max-width:1024px) {
+    .calendar-header {
+        padding-left: 2px;
+        padding-top: 8px;
+    }
+}
+
+@media screen and (max-width:720px) {
+  .calendar-field {
+        width: 13.1%;
+        min-height: 8vh;
+        max-height: 10vh;
+        margin: 1.1px;
+        }
+  .calendar-header {
+        width: 13.1%;
+        height: 4vh;
+        margin: 1.1px;
+        }
+
+}
+
+@media screen and (max-width: 425px) {
+  .calendar-field {
+        width: 12.5%;
+        margin: 1px;
+        padding-left: 2.5px;
+        }
+  .calendar-header {
+        width: 12.5%;
+        margin: 1px;
+        }
+  .calendar-field-text {
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+}
+
+@media screen and (max-width: 320px) {
+  .calendar-field {
+        width: 12.2%;
+        height: 6vh;
+        margin: 0.6px;
+        }
+  .calendar-header {
+        width: 12.2%;
+        margin: 0.6px;
+        }
+}

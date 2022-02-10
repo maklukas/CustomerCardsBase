@@ -1,5 +1,6 @@
 package com.customercard.customercard.service;
 
+import com.customercard.customercard.mapper.CustomerGeneralMapper;
 import com.customercard.customercard.model.Contact;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Lashes;
@@ -11,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,12 +29,14 @@ public class CustomerService {
     private final CustomerRepo repo;
     private final LashesService lashesService;
     private final ContactService contactService;
+    private final CalendarService calendarService;
 
     @Autowired
-    public CustomerService(CustomerRepo repo, LashesService lashesService, ContactService contactService) {
+    public CustomerService(CustomerRepo repo, LashesService lashesService, ContactService contactService, CalendarService calendarService) {
         this.repo = repo;
         this.lashesService = lashesService;
         this.contactService = contactService;
+        this.calendarService = calendarService;
     }
 
     public Customer create(Customer customer) {
@@ -173,7 +178,7 @@ public class CustomerService {
         return customerWorks;
     }
 
-    public List<CustomerWork> getNextWeekWorks(@Nullable String id, @Nullable String name) {
+    public List<CustomerWork> getNextWorks(@Nullable String id, @Nullable String name) {
         List<CustomerWork> allNextWorks = getAllNextWorks();
         Collections.sort(allNextWorks);
 
@@ -192,10 +197,31 @@ public class CustomerService {
         }
 
         return allNextWorks.stream()
+                .filter(customerWork -> customerWork.getDate() != null)
                 .filter(customerWork ->
-                        customerWork.getDate().isAfter(LocalDateTime.now().minusDays(1))
-                                && customerWork.getDate().isBefore(LocalDateTime.now().plusWeeks(1)))
+                        customerWork.getDate().isAfter(LocalDateTime.now().minusDays(1)))
                 .collect(Collectors.toList());
+    }
+
+    public List<CustomerWork> getWorksInCalendarMonth(LocalDate date) {
+        LocalDate theFirstDayAtTheCalendar = calendarService.getTheDateOfFirstDayAtTheCalendar(date);
+        LocalDate theLastDayAtTheCalendar = theFirstDayAtTheCalendar.plusDays(42);
+
+        List<Customer> all = getAll();
+
+        List<CustomerWork> works = new ArrayList<>();
+        for (Customer c: all) {
+            for (Lashes l: c.getLashesList()) {
+                if (l.getNextDate() != null && l.getNextDate().isAfter(theFirstDayAtTheCalendar.atStartOfDay())
+                        && l.getNextDate().isBefore(theLastDayAtTheCalendar.atStartOfDay())) {
+                    works.add(new CustomerWork(c.getId(), c.getName(), c.getSurname(), l.getNextDate()));
+                }
+            }
+        }
+
+        Collections.sort(works);
+
+        return works;
     }
 
 

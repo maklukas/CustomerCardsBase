@@ -3,15 +3,14 @@ package com.customercard.customercard.view;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.model.Lashes;
-import com.customercard.customercard.model.dto.CustomerGeneralDto;
 import com.customercard.customercard.model.dto.LashesDto;
 import com.customercard.customercard.service.*;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Shortcuts;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -20,14 +19,14 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -88,19 +87,27 @@ public class LashesView extends Div {
         DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
         theInnerGrid.addColumn(it ->
-                        formatter.format(it.getDate())
+                        setNextDateColumnValue(formatter, it.getDate())
                 )
                 .setComparator(LashesDto::getDate)
                 .setHeader("Date");
 
         theInnerGrid.addColumn(it ->
-                        formatter.format(it.getNextDate())
+                        setNextDateColumnValue(formatter, it.getNextDate())
                 )
                 .setComparator(LashesDto::getNextDate)
                 .setHeader("Next Date");
 
         theInnerGrid.addComponentColumn(it -> getEditButton(it.getId())).setHeader("Edit");
         theInnerGrid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
+    }
+
+    private String setNextDateColumnValue(DateTimeFormatter formatter, LocalDateTime date) {
+        if (date != null) {
+            return formatter.format(date);
+        } else {
+            return "";
+        }
     }
 
     private void setTheGridItems() {
@@ -237,14 +244,26 @@ public class LashesView extends Div {
         dateField.setDatePlaceholder("Date");
         dateField.setTimePlaceholder("Time");
 
+        Checkbox nextDateCheckbox = new Checkbox();
+        nextDateCheckbox.setLabel("Next visit planned?");
+
         DateTimePicker nextDateField = new DateTimePicker("Next date");
-        nextDateField.setValue(LocalDateTime.now().plusWeeks(2));
         nextDateField.setDatePlaceholder("Date");
         nextDateField.setTimePlaceholder("Time");
+        nextDateField.setReadOnly(true);
+
+        nextDateCheckbox.addValueChangeListener(it -> {
+            if (it.getValue()) {
+                nextDateField.setReadOnly(false);
+                nextDateField.setValue(LocalDateTime.now().plusWeeks(2));
+            } else {
+                nextDateField.setReadOnly(true);
+                nextDateField.setValue(null);
+            }
+        });
 
         if (!id.equals("")) {
             Lashes theLashes = service.getAll(id, "").get(0);
-
 
             styleComboBox.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getStyle()));
             methodComboBox.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getMethod()));
@@ -255,15 +274,17 @@ public class LashesView extends Div {
             nextDateField.setValue(theLashes.getNextDate());
         }
 
+        Div nextDateDiv = new Div();
+        nextDateDiv.add(nextDateCheckbox, nextDateField);
+
         formLayout.add(
                 styleComboBox,
                 methodComboBox,
                 colorComboBox,
                 commentField,
                 dateField,
-                nextDateField
+                nextDateDiv
         );
-
 
         Text description = new Text("Enter the lashes creation description.");
         dialog.add(new Div(description));

@@ -23,6 +23,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 
 import java.time.ZoneId;
@@ -231,12 +232,20 @@ public class CustomerView extends VerticalLayout {
 
         theGrid.setColumns("name", "surname", "totalWorks");
         theGrid.addColumn(it ->
-                formatter.format(it.getLastDate())
+                        setColumnValue(formatter, it)
                 )
                 .setComparator(CustomerGeneralDto::getLastDate)
                 .setHeader("Last Date");
         theGrid.addComponentColumn(it -> getEditButton(it.getId())).setHeader("Edit");
         theGrid.addComponentColumn(it -> getRemoveButton(it.getId())).setHeader("Remove");
+    }
+
+    private String setColumnValue(DateTimeFormatter formatter, CustomerGeneralDto customer) {
+        if (customer.getLastDate() != null) {
+            return formatter.format(customer.getLastDate());
+        } else {
+            return "";
+        }
     }
 
     private void getTheGridItems() {
