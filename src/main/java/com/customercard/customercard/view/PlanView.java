@@ -185,10 +185,6 @@ public class PlanView extends VerticalLayout {
                         w.toString()));
     }
 
-
-
-    //todo on click open popup with works in the day
-
     private void addTheLayoutOnClickEvent(int id, LocalDate date) {
         calendarFields.get(id).addClickListener(it ->
             openPopup(date)
