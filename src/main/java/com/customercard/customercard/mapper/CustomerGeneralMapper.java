@@ -1,7 +1,9 @@
 package com.customercard.customercard.mapper;
 
 import com.customercard.customercard.model.Customer;
+import com.customercard.customercard.model.Lashes;
 import com.customercard.customercard.model.dto.CustomerGeneralDto;
+import com.customercard.customercard.model.dto.CustomerWork;
 import com.customercard.customercard.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,6 +33,20 @@ public class CustomerGeneralMapper {
     public List<CustomerGeneralDto> mapModelListToDtoList(List<Customer> customers) {
         return customers.stream()
                 .map(this::mapModelToDto)
+                .collect(Collectors.toList());
+    }
+
+    public static List<CustomerWork> mapModelToCustomerWorks(List<Customer> customers) {
+
+        return customers.stream()
+                .flatMap(customer -> customer.getLashesList().stream()
+                        .filter(works -> works.getNextDate().isPresent())
+                        .map(w ->
+                                new CustomerWork(
+                                        customer.getId(),
+                                        customer.getName(),
+                                        customer.getSurname(),
+                                        w.getNextDate().get())))
                 .collect(Collectors.toList());
     }
 }

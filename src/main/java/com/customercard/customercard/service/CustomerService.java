@@ -21,6 +21,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.springframework.data.util.Pair.toMap;
 
 @Service("customerService")
 public class CustomerService {
@@ -32,7 +35,10 @@ public class CustomerService {
     private final CalendarService calendarService;
 
     @Autowired
-    public CustomerService(CustomerRepo repo, LashesService lashesService, ContactService contactService, CalendarService calendarService) {
+    public CustomerService(CustomerRepo repo,
+                           LashesService lashesService,
+                           ContactService contactService,
+                           CalendarService calendarService) {
         this.repo = repo;
         this.lashesService = lashesService;
         this.contactService = contactService;
@@ -165,17 +171,11 @@ public class CustomerService {
     }
 
     public List<CustomerWork> getAllNextWorks() {
-        List<Customer> allCustomers = getAll();
-        List<CustomerWork> customerWorks = new ArrayList<>();
 
-        for (Customer c: allCustomers) {
-            if (c.getLashesList().size() > 0) {
-                for (Lashes l: c.getLashesList()) {
-                    customerWorks.add(new CustomerWork(c.getId(), c.getName(), c.getSurname(), l.getNextDate()));
-                }
-            }
-        }
-        return customerWorks;
+        return CustomerGeneralMapper.mapModelToCustomerWorks(getAll())
+                .stream()
+                .sorted()
+                .collect(Collectors.toList());
     }
 
     public List<CustomerWork> getNextWorks(@Nullable String id, @Nullable String name) {
@@ -197,9 +197,9 @@ public class CustomerService {
         }
 
         return allNextWorks.stream()
-                .filter(customerWork -> customerWork.getDate() != null)
+                .filter(customerWork -> customerWork.getDate().isPresent())
                 .filter(customerWork ->
-                        customerWork.getDate().isAfter(LocalDateTime.now().minusDays(1)))
+                        customerWork.getDate().get().isAfter(LocalDateTime.now().minusDays(1)))
                 .collect(Collectors.toList());
     }
 
@@ -207,22 +207,22 @@ public class CustomerService {
         LocalDate theFirstDayAtTheCalendar = calendarService.getTheDateOfFirstDayAtTheCalendar(date);
         LocalDate theLastDayAtTheCalendar = theFirstDayAtTheCalendar.plusDays(42);
 
-        List<Customer> all = getAll();
-
-        List<CustomerWork> works = new ArrayList<>();
-        for (Customer c: all) {
-            for (Lashes l: c.getLashesList()) {
-                if (l.getNextDate() != null && l.getNextDate().isAfter(theFirstDayAtTheCalendar.atStartOfDay())
-                        && l.getNextDate().isBefore(theLastDayAtTheCalendar.atStartOfDay())) {
-                    works.add(new CustomerWork(c.getId(), c.getName(), c.getSurname(), l.getNextDate()));
-                }
-            }
-        }
-
-        Collections.sort(works);
-
-        return works;
+        return CustomerGeneralMapper.mapModelToCustomerWorks(getAll()).stream()
+                .filter(l ->
+                        l.getDate().isPresent() &&
+                                l.getDate().get()
+                                        .isAfter(theFirstDayAtTheCalendar.atStartOfDay())
+                        && l.getDate().get()
+                                .isBefore(theLastDayAtTheCalendar.atStartOfDay()))
+                .sorted()
+                .collect(Collectors.toList());
     }
 
+    public List<CustomerWork> getWorksInTheDay(LocalDate date) {
+        return CustomerGeneralMapper.mapModelToCustomerWorks(getAll()).stream()
+                .filter(customerWork -> customerWork.getDate().isPresent())
+                .filter(customerWork -> customerWork.getDate().get().toLocalDate().isEqual(date))
+                .collect(Collectors.toList());
+    }
 
 }
