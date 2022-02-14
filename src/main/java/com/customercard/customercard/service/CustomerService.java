@@ -222,6 +222,7 @@ public class CustomerService {
         return CustomerGeneralMapper.mapModelToCustomerWorks(getAll()).stream()
                 .filter(customerWork -> customerWork.getDate().isPresent())
                 .filter(customerWork -> customerWork.getDate().get().toLocalDate().isEqual(date))
+                .sorted()
                 .collect(Collectors.toList());
     }
 

@@ -1,6 +1,5 @@
 package com.customercard.customercard.view;
 
-import com.customercard.customercard.model.dto.CustomerGeneralDto;
 import com.customercard.customercard.model.dto.CustomerWork;
 import com.customercard.customercard.service.CalendarService;
 import com.customercard.customercard.service.CustomerService;
@@ -16,7 +15,6 @@ import com.vaadin.flow.router.Route;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -38,7 +36,6 @@ public class PlanView extends VerticalLayout {
     private List<CustomerWork> works;
     private LocalDate theDate;
     private final Span monthName;
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault());
 
     public PlanView(CalendarService service, CustomerService customerService) {
         this.service = service;
@@ -192,9 +189,13 @@ public class PlanView extends VerticalLayout {
     }
 
     private void openPopup(LocalDate date) {
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault());
+
         Dialog dialog = new Dialog();
         dialog.open();
         dialog.setWidthFull();
+        dialog.add(new Span(dateFormatter.format(date)));
         dialog.add(getWorks(date));
 
         Button closeButton = new Button("Close", event ->
@@ -204,6 +205,8 @@ public class PlanView extends VerticalLayout {
     }
 
     private Grid<CustomerWork> getWorks(LocalDate date) {
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
 
         Grid<CustomerWork> works = new Grid<>(CustomerWork.class);
         works.setItems(customerService.getWorksInTheDay(date));
@@ -220,7 +223,5 @@ public class PlanView extends VerticalLayout {
         return works;
 
     }
-
-
 
 }
