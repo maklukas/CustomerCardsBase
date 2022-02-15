@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -51,16 +50,6 @@ public class LashesService {
                 .filter(Lashes -> StringUtils.containsIgnoreCase(Lashes.getComment(), txt))
                 .collect(Collectors.toList());
 
-    }
-
-    public List<Lashes> getAll(@Nullable String id, @Nullable String txt) {
-        if (id != null) {
-            return List.of(getById(id));
-        } else if (txt != null) {
-            return getByComment(txt);
-        } else {
-            return getAll();
-        }
     }
 
     public Lashes create(Lashes lashes) {

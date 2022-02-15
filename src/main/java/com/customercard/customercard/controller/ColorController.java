@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/colors")
@@ -19,7 +20,7 @@ import java.util.Map;
 public class ColorController {
 
     private final ColorService colorService;
-    private ModelMapper mapper;
+    private final ModelMapper mapper;
 
     @Autowired
     public ColorController(ColorService colorService, ModelMapper mapper) {
@@ -29,12 +30,17 @@ public class ColorController {
 
     @GetMapping
     public List<ColorDto> getColor(
-            @RequestParam(required = false, value = "id") String id,
-            @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.map(colorService.getAll(id, txt), new TypeToken<List<ColorDto>>() {}.getType());
+            @RequestParam(required = false, value = "id") Optional<String> id,
+            @RequestParam(required = false, value = "txt") Optional<String> txt) {
+
+        List<Color> colors = id.map(val -> List.of(colorService.getById(val)))
+                .orElse(txt.map(colorService::getByName)
+                        .orElse(colorService.getAll()));
+
+        return mapper.map(colors, new TypeToken<List<ColorDto>>() {}.getType());
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     public void createColor(@RequestBody ColorDto color) {
         colorService.create(mapper.map(color, Color.class));
     }
@@ -44,12 +50,12 @@ public class ColorController {
         colorService.delete(id);
     }
 
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping
     public void updateColor(@RequestBody ColorDto color) {
         colorService.update(mapper.map(color, Color.class));
     }
 
-    @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(params = "id")
     public void partialUpdate(@RequestParam String id, @RequestBody Map<String, Object> updates) {
         Color color = colorService.getById(id);
         colorService.partialUpdate(color, updates);

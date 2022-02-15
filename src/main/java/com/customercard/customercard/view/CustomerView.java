@@ -23,7 +23,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.jetbrains.annotations.NotNull;
 import org.modelmapper.ModelMapper;
 
 import java.time.ZoneId;
@@ -60,6 +59,7 @@ public class CustomerView extends VerticalLayout {
         this.styleService = styleService;
         this.methodService = methodService;
         this.colorService = colorService;
+        this.findValue = "";
         initTheGrid();
         add(getFindTextFieldComponent(), getCreateButton());
         add(theGrid);
@@ -74,9 +74,6 @@ public class CustomerView extends VerticalLayout {
 
         findTextField.addValueChangeListener(it -> {
             findValue = it.getValue();
-            if (findValue.equals("")) {
-                findValue = null;
-            }
             getTheGridItems();
         });
 
@@ -113,7 +110,7 @@ public class CustomerView extends VerticalLayout {
         TextField cityField = new TextField("City");
 
         if (!id.equals("")) {
-            Customer theCustomer = customerService.getAll(id, "").get(0);
+            Customer theCustomer = customerService.getById(id);
 
             firstNameField.setValue(getValueOrReturnEmpty(theCustomer.getName()));
             surnameField.setValue(getValueOrReturnEmpty(theCustomer.getSurname()));
@@ -249,7 +246,7 @@ public class CustomerView extends VerticalLayout {
     }
 
     private void getTheGridItems() {
-        theGrid.setItems(customerGeneralMapper.mapModelListToDtoList(customerService.getAll(null, findValue)));
+        theGrid.setItems(customerGeneralMapper.mapModelListToDtoList(customerService.getByNameFragment(findValue)));
     }
 
     private void createLashesPopup(String id) {

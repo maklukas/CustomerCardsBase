@@ -1,12 +1,11 @@
 package com.customercard.customercard.service;
 
+import com.customercard.customercard.exception.ItemNotFoundException;
 import com.customercard.customercard.model.Color;
 import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.repository.ColorRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ public class ColorService implements DictionaryService {
     @Override
     public Color getById(@NotNull String id) {
         LOGGER.info("Color fetched by id.");
-        return repo.findById(id).orElse(new Color(""));
+        return repo.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
     }
 
     @Override
@@ -46,17 +45,6 @@ public class ColorService implements DictionaryService {
                 .stream()
                 .filter(color -> StringUtils.containsIgnoreCase(color.getName(), txt))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Color> getAll(@Nullable String id, @Nullable String txt) {
-        if (id != null) {
-            return List.of(getById(id));
-        } else if (txt != null) {
-            return getByName(txt);
-        } else {
-            return getAll();
-        }
     }
 
     @Override

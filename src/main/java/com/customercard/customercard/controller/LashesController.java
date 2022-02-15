@@ -1,6 +1,7 @@
 package com.customercard.customercard.controller;
 
 
+import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Lashes;
 import com.customercard.customercard.model.dto.LashesDto;
 import com.customercard.customercard.service.LashesService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/lashes")
@@ -29,13 +31,18 @@ public class LashesController {
 
     @GetMapping
     public List<LashesDto> getLashes(
-            @RequestParam(required = false, value = "id") String id,
-            @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.map(lashesService.getAll(id, txt), new TypeToken<List<LashesDto>>() {
+            @RequestParam(required = false, value = "id") Optional<String> id,
+            @RequestParam(required = false, value = "txt") Optional<String> txt) {
+
+        List<Lashes> lashes = id.map(val -> List.of(lashesService.getById(val)))
+                .orElse(txt.map(lashesService::getByComment)
+                        .orElse(lashesService.getAll()));
+
+        return mapper.map(lashes, new TypeToken<List<LashesDto>>() {
         }.getType());
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     public void createLashes(@RequestBody LashesDto lashes) {
         lashesService.create(mapper.map(lashes, Lashes.class));
     }
@@ -45,12 +52,12 @@ public class LashesController {
         lashesService.delete(id);
     }
 
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping
     public void updateLashes(@RequestBody LashesDto lashes) {
         lashesService.update(mapper.map(lashes, Lashes.class));
     }
 
-    @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(params = "id")
     public void partialUpdate(@RequestParam String id, @RequestBody Map<String, Object> updates) {
         Lashes lashes = lashesService.getById(id);
         lashesService.partialUpdate(lashes, updates);

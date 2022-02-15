@@ -1,11 +1,11 @@
 package com.customercard.customercard.service;
 
+import com.customercard.customercard.exception.ItemNotFoundException;
 import com.customercard.customercard.model.Style;
 import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.repository.StyleRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class StyleService implements DictionaryService {
     @Override
     public Style getById(@NotNull String id) {
         LOGGER.info("Style fetched by id.");
-        return repo.findById(id).orElse(new Style(""));
+        return repo.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
     }
 
     @Override
@@ -45,17 +45,6 @@ public class StyleService implements DictionaryService {
                 .stream()
                 .filter(style -> StringUtils.containsIgnoreCase(style.getName(), txt))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Style> getAll(@Nullable String id, @Nullable String txt) {
-        if (id != null) {
-            return List.of(getById(id));
-        } else if (txt != null) {
-            return getByName(txt);
-        } else {
-            return getAll();
-        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 @Document("lashes")
 @Setter
@@ -37,5 +38,9 @@ public class Lashes extends AbstractEntity {
     @Override
     public int hashCode() {
         return Objects.hash(style, method, color, comment, date, nextDate);
+    }
+
+    public Optional<LocalDateTime> getNextDate() {
+        return Optional.ofNullable(nextDate);
     }
 }

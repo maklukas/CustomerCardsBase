@@ -263,7 +263,7 @@ public class LashesView extends Div {
         });
 
         if (!id.equals("")) {
-            Lashes theLashes = service.getAll(id, "").get(0);
+            Lashes theLashes = service.getById(id);
 
             styleComboBox.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getStyle()));
             methodComboBox.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getMethod()));
@@ -271,7 +271,7 @@ public class LashesView extends Div {
 
             commentField.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getComment()));
             dateField.setValue(theLashes.getDate());
-            nextDateField.setValue(theLashes.getNextDate());
+            nextDateField.setValue(theLashes.getNextDate().orElse(null));
         }
 
         Div nextDateDiv = new Div();
@@ -310,7 +310,7 @@ public class LashesView extends Div {
                     customer.getLashesList().add(lashes);
 
                 } else {
-                    int listId = customer.getLashesList().indexOf(service.getAll(id, "").get(0));
+                    int listId = customer.getLashesList().indexOf(service.getById(id));
                     lashes.setId(id);
                     service.update(lashes);
                     customer.getLashesList().set(listId, lashes);

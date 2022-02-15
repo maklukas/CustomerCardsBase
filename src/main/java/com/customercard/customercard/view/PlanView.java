@@ -4,6 +4,8 @@ import com.customercard.customercard.model.dto.CustomerWork;
 import com.customercard.customercard.service.CalendarService;
 import com.customercard.customercard.service.CustomerService;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -13,10 +15,14 @@ import com.vaadin.flow.router.Route;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 
 @Route(value = "/plan", layout = MainLayout.class)
@@ -144,6 +150,8 @@ public class PlanView extends VerticalLayout {
             ComponentStyle.setCalendarFieldsStyle(calendarFields.get(i));
             removeTheLayoutContent(i);
             addTheLayoutContent(i, String.valueOf(theDateOfFirstDayAtTheCalendar.getDayOfMonth()));
+            addTheLayoutOnClickEvent(i, theDateOfFirstDayAtTheCalendar);
+
             if (theDateOfFirstDayAtTheCalendar.equals(LocalDate.now())) {
                 ComponentStyle.setCalendarFieldTodayStyle(calendarFields.get(i));
             } else {
@@ -164,8 +172,56 @@ public class PlanView extends VerticalLayout {
     }
 
     private void splitWorks() {
-        for (CustomerWork w : works) {
-            addTheLayoutContent(service.computeFieldNumber(theDate, w.getDate().toLocalDate()), w.toString());
-        }
+
+        works.stream()
+                .filter(w -> w.getDate().isPresent())
+                .forEach(w -> addTheLayoutContent(
+                        service.computeFieldNumber(
+                                theDate,
+                                w.getDate().orElse(null).toLocalDate()),
+                        w.toString()));
     }
+
+    private void addTheLayoutOnClickEvent(int id, LocalDate date) {
+        calendarFields.get(id).addClickListener(it ->
+            openPopup(date)
+        );
+    }
+
+    private void openPopup(LocalDate date) {
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault());
+
+        Dialog dialog = new Dialog();
+        dialog.open();
+        dialog.setWidthFull();
+        dialog.add(new Span(dateFormatter.format(date)));
+        dialog.add(getWorks(date));
+
+        Button closeButton = new Button("Close", event ->
+                dialog.close()
+        );
+        dialog.add(closeButton);
+    }
+
+    private Grid<CustomerWork> getWorks(LocalDate date) {
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withZone(ZoneId.systemDefault());
+
+        Grid<CustomerWork> works = new Grid<>(CustomerWork.class);
+        works.setItems(customerService.getWorksInTheDay(date));
+        works.removeColumnByKey("id");
+        works.removeColumnByKey("date");
+
+        works.setColumns("name", "surname");
+        works.addColumn(it ->
+                dateTimeFormatter.format(Objects.requireNonNull(it.getDate().orElse(null)))
+                )
+                .setComparator(it -> it.getDate().orElseThrow(() -> new RuntimeException("No date passed")))
+                .setHeader("Date");
+
+        return works;
+
+    }
+
 }
