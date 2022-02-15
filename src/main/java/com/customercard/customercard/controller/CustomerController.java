@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -33,17 +34,27 @@ public class CustomerController {
 
     @GetMapping
     public List<CustomerDto> getCustomer(
-            @RequestParam(required = false, value = "id") String id,
-            @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.map(customerService.getAll(id, txt), new TypeToken<List<CustomerDto>>() {
+            @RequestParam(required = false, value = "id") Optional<String> id,
+            @RequestParam(required = false, value = "txt") Optional<String> txt) {
+
+        List<Customer> customers = id.map(val -> List.of(customerService.getById(val)))
+                .orElse(txt.map(customerService::getByNameFragment)
+                        .orElse(customerService.getAll()));
+
+        return mapper.map(customers, new TypeToken<List<CustomerDto>>() {
         }.getType());
     }
 
     @GetMapping("/general")
     public List<CustomerGeneralDto> getCustomerGeneral(
-            @RequestParam(required = false, value = "id") String id,
-            @RequestParam(required = false, value = "txt") String txt) {
-        return customerGeneralMapper.mapModelListToDtoList(customerService.getAll(id, txt));
+            @RequestParam(required = false, value = "id") Optional<String> id,
+            @RequestParam(required = false, value = "txt") Optional<String> txt) {
+
+        List<Customer> customers = id.map(val -> List.of(customerService.getById(val)))
+                .orElse(txt.map(customerService::getByNameFragment)
+                        .orElse(customerService.getAll()));
+
+        return customerGeneralMapper.mapModelListToDtoList(customers);
     }
 
     @GetMapping("/next")
@@ -53,7 +64,7 @@ public class CustomerController {
         return customerService.getNextWorks(id, name);
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     public void createCustomer(@RequestBody CustomerDto customer) {
         customerService.create(mapper.map(customer, Customer.class));
     }
@@ -63,12 +74,12 @@ public class CustomerController {
         customerService.delete(id);
     }
 
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping
     public void updateCustomer(@RequestBody CustomerDto customer) {
         customerService.update(mapper.map(customer, Customer.class));
     }
 
-    @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(params = "id")
     public void partialUpdate(@RequestParam String id, @RequestBody Map<String, Object> updates) {
         Customer customer = customerService.getById(id);
         customerService.partialUpdate(customer, updates);

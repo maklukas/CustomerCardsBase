@@ -12,8 +12,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -80,16 +78,6 @@ public class CustomerService {
                 .filter(customer -> StringUtils.containsIgnoreCase(customer.getName(), txt)
                         || StringUtils.containsIgnoreCase(customer.getSurname(), txt))
                 .collect(Collectors.toList());
-    }
-
-    public List<Customer> getAll(@Nullable String id, @Nullable String txt) {
-        if (id != null) {
-            return List.of(getById(id));
-        } else if (txt != null) {
-            return getByNameFragment(txt);
-        } else {
-            return getAll();
-        }
     }
 
     public int getLashesWorkNumber(@NotNull Customer customer) {

@@ -1,11 +1,11 @@
 package com.customercard.customercard.service;
 
+import com.customercard.customercard.exception.ItemNotFoundException;
 import com.customercard.customercard.model.Method;
 import com.customercard.customercard.model.Dictionary;
 import com.customercard.customercard.repository.MethodRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class MethodService implements DictionaryService {
     @Override
     public Method getById(@NotNull String id) {
         LOGGER.info("Method fetched by id.");
-        return repo.findById(id).orElse(new Method(""));
+        return repo.findById(id).orElseThrow(() -> new ItemNotFoundException(id));
     }
 
     @Override
@@ -45,17 +45,6 @@ public class MethodService implements DictionaryService {
                 .stream()
                 .filter(method -> StringUtils.containsIgnoreCase(method.getName(), txt))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Method> getAll(@Nullable String id, @Nullable String txt) {
-        if (id != null) {
-            return List.of(getById(id));
-        } else if (txt != null) {
-            return getByName(txt);
-        } else {
-            return getAll();
-        }
     }
 
     @Override

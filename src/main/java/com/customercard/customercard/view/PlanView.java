@@ -217,7 +217,7 @@ public class PlanView extends VerticalLayout {
         works.addColumn(it ->
                 dateTimeFormatter.format(Objects.requireNonNull(it.getDate().orElse(null)))
                 )
-                .setComparator(it -> it.getDate().orElse(null))
+                .setComparator(it -> it.getDate().orElseThrow(() -> new RuntimeException("No date passed")))
                 .setHeader("Date");
 
         return works;

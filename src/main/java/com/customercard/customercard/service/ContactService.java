@@ -47,16 +47,6 @@ public class ContactService {
                 .collect(Collectors.toList());
     }
 
-    public List<Contact> getAll(@Nullable String id, @Nullable String txt) {
-        if (id != null) {
-            return List.of(getById(id));
-        } else if (txt != null) {
-            return getByName(txt);
-        } else {
-            return getAll();
-        }
-    }
-
     public Contact create(Contact contact) {
 
         if (validateIfExists(contact)) {

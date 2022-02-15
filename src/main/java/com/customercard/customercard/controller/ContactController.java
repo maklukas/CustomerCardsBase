@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/contacts")
@@ -29,13 +30,16 @@ public class ContactController {
 
     @GetMapping
     public List<ContactDto> getContact(
-            @RequestParam(required = false, value = "id") String id,
-            @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.map(contactService.getAll(id, txt), new TypeToken<List<ContactDto>>() {
+            @RequestParam(required = false, value = "id") Optional<String> id,
+            @RequestParam(required = false, value = "txt") Optional<String> txt) {
+        List<Contact> contacts = id.map(val -> List.of(contactService.getById(val)))
+                .orElse(txt.map(contactService::getByName)
+                        .orElse(contactService.getAll()));
+        return mapper.map(contacts, new TypeToken<List<ContactDto>>() {
         }.getType());
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     public void createContact(@RequestBody ContactDto contact) {
         contactService.create(mapper.map(contact, Contact.class));
     }
@@ -45,12 +49,12 @@ public class ContactController {
         contactService.delete(id);
     }
 
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping
     public void updateContact(@RequestBody ContactDto contact) {
         contactService.update(mapper.map(contact, Contact.class));
     }
 
-    @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(params = "id")
     public void partialUpdate(@RequestParam String id, @RequestBody Map<String, Object> updates) {
         Contact contact = contactService.getById(id);
         contactService.partialUpdate(contact, updates);

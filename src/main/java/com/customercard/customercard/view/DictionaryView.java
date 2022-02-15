@@ -29,6 +29,7 @@ public abstract class DictionaryView extends VerticalLayout {
     public DictionaryView(DictionaryService service, ModelMapper mapper) {
         this.service = service;
         this.mapper = mapper;
+        this.findValue = "";
         initTheGrid();
         add(getFindTextFieldComponent(), getCreateButton());
         add(theGrid);
@@ -43,9 +44,6 @@ public abstract class DictionaryView extends VerticalLayout {
 
         findTextField.addValueChangeListener(it -> {
             findValue = it.getValue();
-            if (findValue.equals("")) {
-                findValue = null;
-            }
             setTheGridItems();
         });
 
@@ -66,7 +64,7 @@ public abstract class DictionaryView extends VerticalLayout {
     }
 
     private void setTheGridItems() {
-        List<Dictionary> dictionaries = mapper.map(service.getAll(null, findValue), new TypeToken<List<Dictionary>>() {
+        List<Dictionary> dictionaries = mapper.map(service.getByName(findValue), new TypeToken<List<Dictionary>>() {
             }.getType());
         theGrid.setItems(dictionaries);
     }

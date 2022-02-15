@@ -1,6 +1,7 @@
 package com.customercard.customercard.controller;
 
 
+import com.customercard.customercard.model.Method;
 import com.customercard.customercard.model.Style;
 import com.customercard.customercard.model.dto.StyleDto;
 import com.customercard.customercard.service.StyleService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/styles")
@@ -29,12 +31,17 @@ public class StyleController {
 
     @GetMapping
     public List<StyleDto> getStyle(
-            @RequestParam(required = false, value = "id") String id,
-            @RequestParam(required = false, value = "txt") String txt) {
-        return mapper.map(styleService.getAll(id, txt), new TypeToken<List<StyleDto>>() {}.getType());
+            @RequestParam(required = false, value = "id") Optional<String> id,
+            @RequestParam(required = false, value = "txt") Optional<String> txt) {
+
+        List<Style> styles = id.map(val -> List.of(styleService.getById(val)))
+                .orElse(txt.map(styleService::getByName)
+                        .orElse(styleService.getAll()));
+
+        return mapper.map(styles, new TypeToken<List<StyleDto>>() {}.getType());
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     public void createStyle(@RequestBody StyleDto style) {
         styleService.create(mapper.map(style, Style.class));
     }
@@ -44,12 +51,12 @@ public class StyleController {
         styleService.delete(id);
     }
 
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping
     public void updateStyle(@RequestBody StyleDto style) {
         styleService.update(mapper.map(style, Style.class));
     }
 
-    @PatchMapping(params = "id", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(params = "id")
     public void partialUpdate(@RequestParam String id, @RequestBody Map<String, Object> updates) {
         Style style = styleService.getById(id);
         styleService.partialUpdate(style, updates);
