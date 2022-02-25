@@ -29,12 +29,17 @@ class ColorControllerTest {
 
     @MockBean
     private final ColorController colorController;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
+    private final ColorDto color;
 
     @Autowired
-    public ColorControllerTest(MockMvc mockMvc, ColorController colorController) {
+    public ColorControllerTest(MockMvc mockMvc, ColorController colorController, ObjectMapper mapper) {
         this.mockMvc = mockMvc;
         this.colorController = colorController;
+        this.mapper = mapper;
+        this.color = new ColorDto();
+        this.color.setId("test");
+        this.color.setName("test2");
     }
 
     @Test
@@ -57,9 +62,6 @@ class ColorControllerTest {
 
     @Test
     void shouldCreateColor() throws Exception {
-        ColorDto color = new ColorDto();
-        color.setId("test");
-        color.setName("test2");
 
         String colorJson = mapper.writeValueAsString(color);
 
@@ -79,9 +81,6 @@ class ColorControllerTest {
 
     @Test
     void shouldUpdateColor() throws Exception {
-        ColorDto color = new ColorDto();
-        color.setId("test");
-        color.setName("test2");
 
         String colorJson = mapper.writeValueAsString(color);
 
@@ -94,9 +93,6 @@ class ColorControllerTest {
 
     @Test
     void shouldPartialUpdateColor() throws Exception {
-        ColorDto color = new ColorDto();
-        color.setId("test");
-        color.setName("test2");
 
         String colorJson = mapper.writeValueAsString(color);
 
@@ -107,4 +103,5 @@ class ColorControllerTest {
                         .content(colorJson))
                 .andExpect(status().isOk());
     }
+
 }

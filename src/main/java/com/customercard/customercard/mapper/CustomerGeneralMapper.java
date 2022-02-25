@@ -39,6 +39,7 @@ public class CustomerGeneralMapper {
     public static List<CustomerWork> mapModelToCustomerWorks(List<Customer> customers) {
 
         return customers.stream()
+                .filter(customer -> customer.getLashesList() != null)
                 .flatMap(customer -> customer.getLashesList().stream()
                         .filter(works -> works.getNextDate().isPresent())
                         .map(w ->

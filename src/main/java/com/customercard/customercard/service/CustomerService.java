@@ -19,9 +19,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.springframework.data.util.Pair.toMap;
 
 @Service("customerService")
 public class CustomerService {
@@ -167,28 +164,32 @@ public class CustomerService {
     }
 
     public List<CustomerWork> getNextWorks(@Nullable String id, @Nullable String name) {
-        List<CustomerWork> allNextWorks = getAllNextWorks();
-        Collections.sort(allNextWorks);
+        List<CustomerWork> works = new ArrayList<>();
 
-        if (id != null && !id.equals("")) {
-            allNextWorks = allNextWorks.stream()
-                    .filter(customerWork -> customerWork.getId().equals(id))
-                    .collect(Collectors.toList());
-        }
+         Optional.ofNullable(id)
+                .ifPresent(
+                       it -> getAllNextWorks().stream()
+                                .filter(work -> work.getId().equals(it))
+                                .filter(work -> work.getDate().isPresent())
+                                .filter(work -> work.getDate().get().isAfter(LocalDateTime.now()))
+                                .forEach(works::add)
+                );
 
-        if (name != null && !name.equals("")) {
-            allNextWorks = allNextWorks.stream()
-                    .filter(customerWork ->
-                            StringUtils.containsIgnoreCase(customerWork.getName(), name) ||
-                                    StringUtils.containsIgnoreCase(customerWork.getSurname(), name))
-                    .collect(Collectors.toList());
-        }
+         if (works.size() > 0) {
+             return works;
+         }
 
-        return allNextWorks.stream()
-                .filter(customerWork -> customerWork.getDate().isPresent())
-                .filter(customerWork ->
-                        customerWork.getDate().get().isAfter(LocalDateTime.now().minusDays(1)))
-                .collect(Collectors.toList());
+        Optional.ofNullable(name)
+                .ifPresent(
+                        it -> getAllNextWorks().stream()
+                                .filter(work -> StringUtils.containsIgnoreCase(work.getName(), it) ||
+                                        StringUtils.containsIgnoreCase(work.getSurname(), it))
+                                .filter(work -> work.getDate().isPresent())
+                                .filter(work -> work.getDate().get().isAfter(LocalDateTime.now()))
+                                .forEach(works::add)
+                );
+
+        return works;
     }
 
     public List<CustomerWork> getWorksInCalendarMonth(LocalDate date) {
