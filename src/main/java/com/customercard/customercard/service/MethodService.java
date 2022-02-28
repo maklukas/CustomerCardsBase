@@ -104,7 +104,7 @@ public class MethodService implements DictionaryService {
                 .findByName(name)
                 .stream()
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new ItemNotFoundException(name));
     }
 
 }

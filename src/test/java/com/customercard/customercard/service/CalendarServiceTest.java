@@ -1,23 +1,12 @@
 package com.customercard.customercard.service;
 
-import com.customercard.customercard.model.Customer;
-import com.customercard.customercard.model.Lashes;
-import com.customercard.customercard.model.dto.CustomerWork;
 import com.customercard.customercard.repository.CustomerRepo;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,8 +23,6 @@ class CalendarServiceTest {
         this.customerService = customerService;
         this.repo = repo;
     }
-
-
 
     @Test
     void shouldGetTheFirstDayOfCurrentMonth() {
@@ -76,19 +63,15 @@ class CalendarServiceTest {
         assertEquals(38, calendarService.computeFieldNumber(LocalDate.of(2022, 1, 27), LocalDate.of(2022, 1, 27)));
         assertEquals(7, calendarService.computeFieldNumber(LocalDate.of(2022, 1, 27), LocalDate.of(2021, 12, 27)));
         assertEquals(35, calendarService.computeFieldNumber(LocalDate.of(2021, 12, 27), LocalDate.of(2021, 12, 27)));
-
     }
 
     @Test
     void setCalendarSe() {
-
         LocalDate date = LocalDate.of(2022,1,27);
         LocalDate first = calendarService.getTheDateOfFirstDayAtTheCalendar(date);
 
         int between = (int) ChronoUnit.DAYS.between(first, date);
 
         System.out.println(between);
-
-
     }
 }

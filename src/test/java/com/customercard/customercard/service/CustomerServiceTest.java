@@ -4,11 +4,13 @@ import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Lashes;
 import com.customercard.customercard.model.dto.CustomerWork;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,14 +28,15 @@ class CustomerServiceTest {
     private Customer customer;
     private final LocalDateTime timeNow;
     private final long collectionSize;
+    private final int PLUS_MONTHS = 99;
 
     @Autowired
     public CustomerServiceTest(CustomerService service, LashesService lashesService) {
         this.service = service;
         this.lashesService = lashesService;
-        this.timeNow = LocalDateTime.now();
-        initObject();
+        this.timeNow = LocalDate.of(2022, 2, 22).atStartOfDay();
         this.collectionSize = service.getAll().size();
+        initObject();
     }
 
     private void initObject() {
@@ -48,10 +51,10 @@ class CustomerServiceTest {
         customer.setLashesList(new ArrayList<>());
         customer.getLashesList().add(lashes);
         customer.getLashesList().get(0).setDate(timeNow);
-        customer.getLashesList().get(0).setNextDate(timeNow.plusMonths(99));
+        customer.getLashesList().get(0).setNextDate(timeNow.plusMonths(PLUS_MONTHS));
     }
 
-    @BeforeEach
+    @AfterEach
     void deleteTestObject() {
         service.delete("testId");
         lashesService.delete("testLashes");
@@ -65,10 +68,6 @@ class CustomerServiceTest {
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
         assertEquals("testName", service.getById("testId").getName());
-
-        //cleanUp
-        service.delete("testId");
-        assertEquals(collectionSize, service.getAll().size());
     }
 
     @Test
@@ -91,10 +90,6 @@ class CustomerServiceTest {
 
         //then 2
         assertEquals("testName2", service.getById("testId").getName());
-
-        //cleanUp
-        service.delete("testId");
-        assertEquals(collectionSize, service.getAll().size());
     }
 
     @Test
@@ -106,10 +101,9 @@ class CustomerServiceTest {
         assertEquals(collectionSize + 1, service.getAll().size());
         assertEquals("testName", service.getById("testId").getName());
 
-        //cleanUp
+        //when2
         service.delete("testId");
         assertEquals(collectionSize, service.getAll().size());
-
     }
 
     @Test
@@ -127,11 +121,6 @@ class CustomerServiceTest {
                 .flatMap(it -> it.getLashesList().stream()
                         .map(lashes -> it.getSurname() + " " + lashes.getNextDate()))
                 .forEach(System.out::println);
-
-        //cleanUp
-        service.delete("testId");
-        assertEquals(collectionSize, service.getAll().size());
-
     }
 
     @Test
@@ -141,9 +130,6 @@ class CustomerServiceTest {
 
         //then
         assertEquals("testName", service.getById("testId").getName());
-
-        //cleanUp
-        service.delete("testId");
     }
 
     @Test
@@ -154,9 +140,6 @@ class CustomerServiceTest {
         //then
         assertEquals("testName", service.getById("testId").getName());
         assertEquals("testSurname", service.getByNameFragment("testName").get(0).getSurname());
-
-        //cleanUp
-        service.delete("testId");
     }
 
     @Test
@@ -167,9 +150,6 @@ class CustomerServiceTest {
         //then
         assertEquals("testName", service.getById("testId").getName());
         assertEquals(1, service.getLashesWorkNumber(customer));
-
-        //cleanUp
-        service.delete("testId");
     }
 
     @Test
@@ -180,9 +160,6 @@ class CustomerServiceTest {
         //then
         assertEquals("testName", service.getById("testId").getName());
         assertEquals(timeNow, service.getLastWorkDate(customer));
-
-        //cleanUp
-        service.delete("testId");
     }
 
     @Test
@@ -204,10 +181,6 @@ class CustomerServiceTest {
         //then 2
         assertEquals("testName2", service.getById("testId").getName());
 
-        //cleanUp
-        service.delete("testId");
-        assertEquals(collectionSize, service.getAll().size());
-
     }
 
     @Test
@@ -220,12 +193,7 @@ class CustomerServiceTest {
         assertTrue(service.getAllNextWorks().size() > 0);
 
         List<CustomerWork> collect = service.getAllNextWorks();
-
         assertEquals("testName", collect.get(collect.size()-1).getName());
-
-        //cleanUp
-        service.delete("testId");
-        assertEquals(collectionSize, service.getAll().size());
     }
 
     @Test
@@ -239,10 +207,6 @@ class CustomerServiceTest {
         //then
         assertEquals("testName", service.getById("testId").getName());
         assertEquals(1, service.getNextWorks("testId", "").size());
-
-        //cleanUp
-        service.delete("testId");
-        assertEquals(collectionSize, service.getAll().size());
     }
 
     @Test
@@ -251,30 +215,39 @@ class CustomerServiceTest {
         service.create(customer);
 
         Customer c = new Customer();
-        c.setId("testId2");
+        c.setId("testIdC");
         c.setLashesList(new ArrayList<>());
         Lashes l = new Lashes();
-        l.setId("testId22");
-        l.setNextDate(LocalDateTime.now().plusMonths(100));
-
+        l.setId("lashesIdTestL");
+        l.setNextDate(LocalDate.of(2022, 2, 22).plusMonths(PLUS_MONTHS + 1).atStartOfDay());
         c.getLashesList().add(l);
         service.create(c);
 
+        Customer c2 = new Customer();
+        c2.setId("testIdC2");
+        c2.setLashesList(new ArrayList<>());
+        Lashes l2 = new Lashes();
+        l2.setId("lashesIdTestL2");
+        //28.02 should be visible on March and February sheet
+        l2.setNextDate(LocalDate.of(2022, 2, 28).plusMonths(PLUS_MONTHS).atStartOfDay());
+        c2.getLashesList().add(l2);
+        service.create(c2);
+
         //then
         assertEquals("testName", service.getById("testId").getName());
-        assertEquals(1,
-                service.getWorksInCalendarMonth(timeNow.plusMonths(99).toLocalDate())
+        assertEquals(2,
+                service.getWorksInCalendarMonth(timeNow.plusMonths(PLUS_MONTHS).toLocalDate())
                         .size());
 
-        assertEquals(1,
-                service.getWorksInCalendarMonth(timeNow.plusMonths(100).toLocalDate())
+        assertEquals(2,
+                service.getWorksInCalendarMonth(timeNow.plusMonths(PLUS_MONTHS + 1).toLocalDate())
                         .size());
 
         //cleanUp
-        service.delete("testId");
-        service.delete("testId2");
-        lashesService.delete("testId22");
-        assertEquals(collectionSize, service.getAll().size());
+        service.delete("testIdC");
+        service.delete("testIdC2");
+        lashesService.delete("lashesIdTestL");
+        lashesService.delete("lashesIdTestL2");
     }
 
     @Test
@@ -285,10 +258,6 @@ class CustomerServiceTest {
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
         assertEquals("testName", service.getById("testId").getName());
-        assertEquals(1, service.getWorksInTheDay(timeNow.plusMonths(99).toLocalDate()).size());
-
-        //cleanUp
-        service.delete("testId");
-        assertEquals(collectionSize, service.getAll().size());
+        assertEquals(1, service.getWorksInTheDay(timeNow.plusMonths(PLUS_MONTHS).toLocalDate()).size());
     }
 }
