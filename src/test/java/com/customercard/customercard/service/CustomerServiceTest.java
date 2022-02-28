@@ -125,7 +125,7 @@ class CustomerServiceTest {
         all.stream()
                 .filter(it -> it.getLashesList() != null)
                 .flatMap(it -> it.getLashesList().stream()
-                        .map(lashes -> it.getSurname() + " " + lashes.getNextDate().orElse(null)))
+                        .map(lashes -> it.getSurname() + " " + lashes.getNextDate()))
                 .forEach(System.out::println);
 
         //cleanUp

@@ -41,13 +41,13 @@ public class CustomerGeneralMapper {
         return customers.stream()
                 .filter(customer -> customer.getLashesList() != null)
                 .flatMap(customer -> customer.getLashesList().stream()
-                        .filter(works -> works.getNextDate().isPresent())
+                        .filter(works -> works.getNextDate() != null)
                         .map(w ->
                                 new CustomerWork(
                                         customer.getId(),
                                         customer.getName(),
                                         customer.getSurname(),
-                                        w.getNextDate().get())))
+                                        w.getNextDate())))
                 .collect(Collectors.toList());
     }
 }

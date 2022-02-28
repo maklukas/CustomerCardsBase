@@ -271,7 +271,7 @@ public class LashesView extends Div {
 
             commentField.setValue(CustomerView.getValueOrReturnEmpty(theLashes.getComment()));
             dateField.setValue(theLashes.getDate());
-            nextDateField.setValue(theLashes.getNextDate().orElse(null));
+            nextDateField.setValue(theLashes.getNextDate());
         }
 
         Div nextDateDiv = new Div();

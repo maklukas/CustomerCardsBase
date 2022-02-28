@@ -170,8 +170,8 @@ public class CustomerService {
                 .ifPresent(
                        it -> getAllNextWorks().stream()
                                 .filter(work -> work.getId().equals(it))
-                                .filter(work -> work.getDate().isPresent())
-                                .filter(work -> work.getDate().get().isAfter(LocalDateTime.now()))
+                                .filter(work -> work.getDate() != null)
+                                .filter(work -> work.getDate().isAfter(LocalDateTime.now()))
                                 .forEach(works::add)
                 );
 
@@ -184,8 +184,8 @@ public class CustomerService {
                         it -> getAllNextWorks().stream()
                                 .filter(work -> StringUtils.containsIgnoreCase(work.getName(), it) ||
                                         StringUtils.containsIgnoreCase(work.getSurname(), it))
-                                .filter(work -> work.getDate().isPresent())
-                                .filter(work -> work.getDate().get().isAfter(LocalDateTime.now()))
+                                .filter(work -> work.getDate() != null)
+                                .filter(work -> work.getDate().isAfter(LocalDateTime.now()))
                                 .forEach(works::add)
                 );
 
@@ -198,19 +198,17 @@ public class CustomerService {
 
         return CustomerGeneralMapper.mapModelToCustomerWorks(getAll()).stream()
                 .filter(l ->
-                        l.getDate().isPresent() &&
-                                l.getDate().get()
-                                        .isAfter(theFirstDayAtTheCalendar.atStartOfDay())
-                        && l.getDate().get()
-                                .isBefore(theLastDayAtTheCalendar.atStartOfDay()))
+                        l.getDate() != null &&
+                                l.getDate().isAfter(theFirstDayAtTheCalendar.atStartOfDay()) &&
+                                l.getDate().isBefore(theLastDayAtTheCalendar.atStartOfDay()))
                 .sorted()
                 .collect(Collectors.toList());
     }
 
     public List<CustomerWork> getWorksInTheDay(LocalDate date) {
         return CustomerGeneralMapper.mapModelToCustomerWorks(getAll()).stream()
-                .filter(customerWork -> customerWork.getDate().isPresent())
-                .filter(customerWork -> customerWork.getDate().get().toLocalDate().isEqual(date))
+                .filter(customerWork -> customerWork.getDate() != null)
+                .filter(customerWork -> customerWork.getDate().toLocalDate().isEqual(date))
                 .sorted()
                 .collect(Collectors.toList());
     }

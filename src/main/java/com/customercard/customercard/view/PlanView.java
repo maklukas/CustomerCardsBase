@@ -178,11 +178,11 @@ public class PlanView extends VerticalLayout {
     private void splitWorks() {
 
         works.stream()
-                .filter(w -> w.getDate().isPresent())
+                .filter(w -> w.getDate() != null)
                 .forEach(w -> addTheLayoutContent(
                         service.computeFieldNumber(
                                 theDate,
-                                w.getDate().orElse(null).toLocalDate()),
+                                w.getDate().toLocalDate()),
                         w.toString()));
     }
 
@@ -225,9 +225,9 @@ public class PlanView extends VerticalLayout {
 
         works.setColumns("name", "surname");
         works.addColumn(it ->
-                dateTimeFormatter.format(Objects.requireNonNull(it.getDate().orElse(null)))
+                dateTimeFormatter.format(Objects.requireNonNull(it.getDate()))
                 )
-                .setComparator(it -> it.getDate().orElseThrow(() -> new RuntimeException("No date passed")))
+                .setComparator(CustomerWork::getDate)
                 .setHeader("Date");
 
         return works;
