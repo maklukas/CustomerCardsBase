@@ -7,10 +7,12 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service("contactService")
@@ -49,22 +51,16 @@ public class ContactService {
 
     public Contact create(Contact contact) {
 
-        if (validateIfExists(contact)) {
-            return findFirstEqual(contact);
-        }
-
         LOGGER.info("Contact created.");
-        return repo.save(contact);
+        return findFirstEqual(contact)
+                .orElseGet(() -> repo.save(contact));
     }
 
     public Contact update(Contact contact) {
 
-        if (validateIfExists(contact)) {
-            return findFirstEqual(contact);
-        }
-
         LOGGER.info("Contact updated.");
-        return repo.save(contact);
+        return findFirstEqual(contact)
+                .orElseGet(() -> repo.save(contact));
     }
 
     public boolean delete(String id) {
@@ -94,24 +90,8 @@ public class ContactService {
         return true;
     }
 
-    public boolean validateIfExists(Contact contact) {
-
-        if (findFirstEqual(contact) != null) {
-            LOGGER.info("Contact already exists.");
-            return true;
-        }
-        return false;
-    }
-
-    public Contact findFirstEqual(Contact contact) {
-        if (repo.findAll().size() > 0) {
-            return repo.findAll().stream()
-                    .filter(c -> c.equals(contact))
-                    .findFirst()
-                    .orElse(null);
-        }
-
-        return null;
+    private Optional<Contact> findFirstEqual(Contact contact) {
+        return repo.findOne(Example.of(contact));
     }
 
 }

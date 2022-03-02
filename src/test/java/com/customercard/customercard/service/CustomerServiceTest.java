@@ -3,10 +3,7 @@ package com.customercard.customercard.service;
 import com.customercard.customercard.model.Customer;
 import com.customercard.customercard.model.Lashes;
 import com.customercard.customercard.model.dto.CustomerWork;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -21,11 +18,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CustomerServiceTest {
 
     private final CustomerService service;
     private final LashesService lashesService;
-    private Customer customer;
+    private final Customer customer;
     private final LocalDateTime timeNow;
     private final long collectionSize;
     private final int PLUS_MONTHS = 99;
@@ -36,11 +35,12 @@ class CustomerServiceTest {
         this.lashesService = lashesService;
         this.timeNow = LocalDate.of(2022, 2, 22).atStartOfDay();
         this.collectionSize = service.getAll().size();
+        this.customer = new Customer();
         initObject();
     }
 
     private void initObject() {
-        this.customer = new Customer();
+
         this.customer.setId("testId");
         this.customer.setName("testName");
         this.customer.setSurname("testSurname");
@@ -54,7 +54,12 @@ class CustomerServiceTest {
         customer.getLashesList().get(0).setNextDate(timeNow.plusMonths(PLUS_MONTHS));
     }
 
-    @AfterEach
+    @BeforeAll
+    void createObject() {
+        service.create(customer);
+    }
+
+    @AfterAll
     void deleteTestObject() {
         service.delete("testId");
         lashesService.delete("testLashes");
@@ -62,9 +67,6 @@ class CustomerServiceTest {
 
     @Test
     void shouldCreate() {
-        //given & when
-        service.create(customer);
-
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
         assertEquals("testName", service.getById("testId").getName());
@@ -76,10 +78,7 @@ class CustomerServiceTest {
         Customer customerUpdated = new Customer();
         customerUpdated.setId("testId");
         customerUpdated.setName("testName2");
-        customerUpdated.setSurname("testSurname2");
-
-        //when
-        service.create(customer);
+        customerUpdated.setSurname("testSurname");
 
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
@@ -90,13 +89,15 @@ class CustomerServiceTest {
 
         //then 2
         assertEquals("testName2", service.getById("testId").getName());
+
+        //cleanUp
+        customerUpdated.setName("testName");
+        service.update(customerUpdated);
     }
 
     @Test
+    @Order(Integer.MAX_VALUE)
     void shouldDelete() {
-        //given & when
-        service.create(customer);
-
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
         assertEquals("testName", service.getById("testId").getName());
@@ -109,7 +110,6 @@ class CustomerServiceTest {
     @Test
     void shouldGetAll() {
         //given & when
-        service.create(customer);
         List<Customer> all = service.getAll();
 
         //then
@@ -125,18 +125,12 @@ class CustomerServiceTest {
 
     @Test
     void shouldGetById() {
-        //given & when
-        service.create(customer);
-
         //then
         assertEquals("testName", service.getById("testId").getName());
     }
 
     @Test
     void shouldGetByNameFragment() {
-        //given & when
-        service.create(customer);
-
         //then
         assertEquals("testName", service.getById("testId").getName());
         assertEquals("testSurname", service.getByNameFragment("testName").get(0).getSurname());
@@ -144,9 +138,6 @@ class CustomerServiceTest {
 
     @Test
     void shouldGetLashesWorkNumber() {
-        //given & when
-        service.create(customer);
-
         //then
         assertEquals("testName", service.getById("testId").getName());
         assertEquals(1, service.getLashesWorkNumber(customer));
@@ -154,9 +145,6 @@ class CustomerServiceTest {
 
     @Test
     void shouldGetLastWorkDate() {
-        //given & when
-        service.create(customer);
-
         //then
         assertEquals("testName", service.getById("testId").getName());
         assertEquals(timeNow, service.getLastWorkDate(customer));
@@ -164,12 +152,9 @@ class CustomerServiceTest {
 
     @Test
     void shouldPartialUpdate() {
-        //given
+        //given & when
         Map<String, Object> part = new HashMap<>();
         part.put("name", "testName2");
-
-        //when
-        service.create(customer);
 
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
@@ -181,13 +166,13 @@ class CustomerServiceTest {
         //then 2
         assertEquals("testName2", service.getById("testId").getName());
 
+        //cleanUp
+        part.put("name", "testName");
+        service.partialUpdate(customer, part);
     }
 
     @Test
     void shouldGetAllNextWorks() {
-        //given & when
-        service.create(customer);
-
         //then
         assertEquals("testName", service.getById("testId").getName());
         assertTrue(service.getAllNextWorks().size() > 0);
@@ -197,23 +182,20 @@ class CustomerServiceTest {
     }
 
     @Test
+    @Order(1)
     void shouldGetNextWorks() {
         //given & when
-        service.create(customer);
-
         service.getNextWorks("testId", "").stream()
                 .map(it -> it.getSurname() + it.getDate())
                 .forEach(System.out::println);
         //then
         assertEquals("testName", service.getById("testId").getName());
-        assertEquals(1, service.getNextWorks("testId", "").size());
+        assertEquals(1, service.getNextWorks("testId", null).size());
     }
 
     @Test
     void shouldGetWorksInCalendarMonth() {
         //given & when
-        service.create(customer);
-
         Customer c = new Customer();
         c.setId("testIdC");
         c.setLashesList(new ArrayList<>());
@@ -252,9 +234,6 @@ class CustomerServiceTest {
 
     @Test
     void shouldGetWorksInTheDay() {
-        //given & when
-        service.create(customer);
-
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
         assertEquals("testName", service.getById("testId").getName());

@@ -1,10 +1,7 @@
 package com.customercard.customercard.service;
 
-import com.customercard.customercard.exception.ItemNotFoundException;
 import com.customercard.customercard.model.Color;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,32 +12,28 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ColorServiceTest {
 
-
     private final ColorService service;
-    private Color color;
+    private final Color color;
     private final int collectionSize;
 
     @Autowired
     public ColorServiceTest(ColorService service) {
         this.service = service;
         this.collectionSize = service.getAll().size();
-        initObject();
-    }
-
-    private void initObject() {
-        this.color = new Color();
+        this.color = new Color("testName");
         this.color.setId("testId");
-        this.color.setName("testName");
     }
 
-    @BeforeEach
+    @BeforeAll
     void createObject() {
         service.create(color);
     }
 
-    @AfterEach
+    @AfterAll
     void cleanUp() {
         service.delete("testId");
     }
@@ -92,17 +85,10 @@ class ColorServiceTest {
 
         //then 2
         assertEquals("testName2", service.getById("testId").getName());
-    }
 
-    @Test
-    void shouldDelete() {
-        //then
-        assertEquals(collectionSize + 1, service.getAll().size());
-        assertEquals("testName", service.getById("testId").getName());
-
-        //when2
-        service.delete("testId");
-        assertEquals(collectionSize, service.getAll().size());
+        //cleanUp
+        c.setName("testName");
+        service.update(c);
     }
 
     @Test
@@ -120,19 +106,30 @@ class ColorServiceTest {
 
         //given
         assertEquals("testName2", service.getById("testId").getName());
-    }
 
-    @Test
-    void shouldValidateIfExists() {
-        //then
-        assertTrue(service.validateIfExists(color));
-        assertFalse(service.validateIfExists(new Color("XYZTEST")));
+        //cleanUp
+        partial.put("name", "testName");
+        service.partialUpdate(color, partial);
     }
 
     @Test
     void shouldFindFirstByName() {
+        //given
+        Color testName = service.findFirstByName("testName").orElseThrow();
+
         //then
-        assertThrows(ItemNotFoundException.class, () -> service.findFirstByName("teteteteteteetetetetetest"));
-        assertEquals("testName", service.findFirstByName("testName").getName());
+        assertEquals("testId", testName.getId());
+    }
+
+    @Test
+    @Order(Integer.MAX_VALUE)
+    void shouldDelete() {
+        //then
+        assertEquals(collectionSize + 1, service.getAll().size());
+        assertEquals("testName", service.getById("testId").getName());
+
+        //when2
+        service.delete("testId");
+        assertEquals(collectionSize, service.getAll().size());
     }
 }

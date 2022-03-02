@@ -167,23 +167,16 @@ public class CustomerService {
         List<CustomerWork> works = new ArrayList<>();
 
          Optional.ofNullable(id)
-                .ifPresent(
+                .ifPresentOrElse(
                        it -> getAllNextWorks().stream()
                                 .filter(work -> work.getId().equals(it))
                                 .filter(work -> work.getDate() != null)
                                 .filter(work -> work.getDate().isAfter(LocalDateTime.now()))
-                                .forEach(works::add)
-                );
-
-         if (works.size() > 0) {
-             return works;
-         }
-
-        Optional.ofNullable(name)
-                .ifPresent(
-                        it -> getAllNextWorks().stream()
-                                .filter(work -> StringUtils.containsIgnoreCase(work.getName(), it) ||
-                                        StringUtils.containsIgnoreCase(work.getSurname(), it))
+                                .forEach(works::add),
+                        () ->
+                        getAllNextWorks().stream()
+                                .filter(work -> StringUtils.containsIgnoreCase(work.getName(), name) ||
+                                        StringUtils.containsIgnoreCase(work.getSurname(), name))
                                 .filter(work -> work.getDate() != null)
                                 .filter(work -> work.getDate().isAfter(LocalDateTime.now()))
                                 .forEach(works::add)

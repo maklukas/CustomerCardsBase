@@ -2,11 +2,8 @@ package com.customercard.customercard.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.customercard.customercard.exception.ItemNotFoundException;
 import com.customercard.customercard.model.Method;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,31 +12,28 @@ import java.util.List;
 import java.util.Map;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class MethodServiceTest {
 
     private final MethodService service;
-    private Method method;
+    private final Method method;
     private final int collectionSize;
 
     @Autowired
     public MethodServiceTest(MethodService service) {
         this.service = service;
         this.collectionSize = service.getAll().size();
-        initObject();
-    }
-
-    private void initObject() {
-        this.method = new Method();
+        this.method = new Method("testName");
         this.method.setId("testId");
-        this.method.setName("testName");
     }
 
-    @BeforeEach
+    @BeforeAll
     void createObject() {
         service.create(method);
     }
 
-    @AfterEach
+    @AfterAll
     void cleanUp() {
         service.delete("testId");
     }
@@ -91,9 +85,14 @@ class MethodServiceTest {
 
         //then 2
         assertEquals("testName2", service.getById("testId").getName());
+
+        //cleanUp
+        c.setName("testName");
+        service.update(c);
     }
 
     @Test
+    @Order(Integer.MAX_VALUE)
     void shouldDelete() {
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
@@ -119,19 +118,18 @@ class MethodServiceTest {
 
         //given
         assertEquals("testName2", service.getById("testId").getName());
-    }
 
-    @Test
-    void shouldValidateIfExists() {
-        //then
-        assertTrue(service.validateIfExists(method));
-        assertFalse(service.validateIfExists(new Method("XYZTEST")));
+        //cleanUp
+        partial.put("name", "testName");
+        service.partialUpdate(method, partial);
     }
 
     @Test
     void shouldFindFirstByName() {
+        //given
+        Method testName = service.findFirstByName("testName").orElseThrow();
+
         //then
-        assertThrows(ItemNotFoundException.class, () -> service.findFirstByName("teteteteteteetetetetetest"));
-        assertEquals("testName", service.findFirstByName("testName").getName());
+        assertEquals("testId", testName.getId());
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service("methodService")
@@ -50,23 +51,23 @@ public class MethodService implements DictionaryService {
     @Override
     public Dictionary create(Dictionary method) {
 
-        if (validateIfExists(method)) {
-            return findFirstByName(method.getName());
-        }
-
-        LOGGER.info("Method created.");
-        return repo.save((Method) method);
+        return findFirstByName(method.getName())
+                .orElseGet(() -> {
+                    LOGGER.info("Method created.");
+                    return repo.save((Method) method);
+                });
 
     }
 
     @Override
     public Dictionary update(Dictionary method) {
 
-        if (validateIfExists(method)) {
-            return findFirstByName(method.getName());
-        }
-        LOGGER.info("Method updated.");
-        return repo.save((Method) method);
+        return findFirstByName(method.getName())
+                .orElseGet(() -> {
+                    LOGGER.info("Method updated.");
+                    return repo.save((Method) method);
+                });
+
     }
 
     @Override
@@ -87,24 +88,11 @@ public class MethodService implements DictionaryService {
     }
 
     @Override
-    public boolean validateIfExists(Dictionary method) {
-        if (repo.findByName(method.getName()).size() > 0) {
-            LOGGER.info("Method already exists.");
-            return true;
-        } else if (method.getName() == null || method.getName().equals("")){
-            LOGGER.info("Empty method passed.");
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public Method findFirstByName(String name) {
+    public Optional<Method> findFirstByName(String name) {
         return repo
                 .findByName(name)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new ItemNotFoundException(name));
+                .findFirst();
     }
 
 }

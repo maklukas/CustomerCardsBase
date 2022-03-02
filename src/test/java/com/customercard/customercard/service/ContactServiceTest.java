@@ -1,8 +1,6 @@
 package com.customercard.customercard.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import com.customercard.customercard.model.Style;
+import com.customercard.customercard.model.Contact;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,44 +9,56 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class StyleServiceTest {
+class ContactServiceTest {
 
-    private final StyleService service;
-    private final Style style;
+    private final ContactService service;
+    private Contact contact;
     private final int collectionSize;
 
     @Autowired
-    public StyleServiceTest(StyleService service) {
+    public ContactServiceTest(ContactService service) {
         this.service = service;
         this.collectionSize = service.getAll().size();
-        this.style = new Style("testName");
-        this.style.setId("testId");
+        initObject();
+    }
+
+    private void initObject() {
+        this.contact = new Contact(
+                "testPhone",
+                "testEmail",
+                "testStreet",
+                "testCity",
+                "testBox"
+        );
+        this.contact.setId("testId");
     }
 
     @BeforeAll
     void createObject() {
-        service.create(style);
+        service.create(contact);
     }
 
     @AfterAll
-    void cleanUp() {
+    void deleteObject() {
         service.delete("testId");
     }
 
     @Test
     void shouldGetAll() {
         //given & when
-        List<Style> all = service.getAll();
+        List<Contact> all = service.getAll();
 
         //then
         assertEquals(collectionSize + 1, all.size());
         assertTrue(all.size() > 0);
-        assertEquals("testName", service.getById("testId").getName());
+        assertEquals("testStreet", service.getById("testId").getStreet());
         all.stream()
-                .map(Style::getName)
+                .map(Contact::getStreet)
                 .forEach(System.out::println);
     }
 
@@ -56,14 +66,14 @@ class StyleServiceTest {
     void shouldGetById() {
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
-        assertEquals("testName", service.getById("testId").getName());
+        assertEquals("testStreet", service.getById("testId").getStreet());
     }
 
     @Test
     void shouldGetByName() {
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
-        assertEquals("testId", service.getByName("testName").get(0).getId());
+        assertEquals("testId", service.getByName("testStreet").get(0).getId());
     }
 
     @Test
@@ -75,19 +85,24 @@ class StyleServiceTest {
     void shouldUpdate() {
         //given
         assertEquals(collectionSize + 1, service.getAll().size());
-        assertEquals("testName", service.getById("testId").getName());
+        assertEquals("testStreet", service.getById("testId").getStreet());
 
         //given & when 2
-        Style c = new Style();
+        Contact c = new Contact(
+                "testPhone",
+                "testEmail",
+                "testStreet2",
+                "testCity",
+                "testBox"
+        );
         c.setId("testId");
-        c.setName("testName2");
         service.update(c);
 
         //then 2
-        assertEquals("testName2", service.getById("testId").getName());
+        assertEquals("testStreet2", service.getById("testId").getStreet());
 
         //cleanUp
-        c.setName("testName");
+        c.setStreet("testStreet");
         service.update(c);
     }
 
@@ -96,7 +111,7 @@ class StyleServiceTest {
     void shouldDelete() {
         //then
         assertEquals(collectionSize + 1, service.getAll().size());
-        assertEquals("testName", service.getById("testId").getName());
+        assertEquals("testStreet", service.getById("testId").getStreet());
 
         //when2
         service.delete("testId");
@@ -107,29 +122,20 @@ class StyleServiceTest {
     void shouldPartialUpdate() {
         //given
         assertEquals(collectionSize + 1, service.getAll().size());
-        assertEquals("testName", service.getById("testId").getName());
+        assertEquals("testStreet", service.getById("testId").getStreet());
 
         //given2
         Map<String, Object> partial = new HashMap<>();
-        partial.put("name", "testName2");
+        partial.put("street", "testStreet2");
 
         //then
-        service.partialUpdate(style, partial);
+        service.partialUpdate(contact, partial);
 
         //given
-        assertEquals("testName2", service.getById("testId").getName());
+        assertEquals("testStreet2", service.getById("testId").getStreet());
 
         //cleanUp
-        partial.put("name", "testName");
-        service.partialUpdate(style, partial);
-    }
-
-    @Test
-    void shouldFindFirstByName() {
-        //given
-        Style testName = service.findFirstByName("testName").orElseThrow();
-
-        //then
-        assertEquals("testId", testName.getId());
+        partial.put("street", "testStreet");
+        service.partialUpdate(contact, partial);
     }
 }
