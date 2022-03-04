@@ -51,6 +51,10 @@ public class StyleService implements DictionaryService {
     @Override
     public Dictionary create(Dictionary style) {
 
+        if (style.getName() == null || style.getName().isBlank()) {
+            return null;
+        }
+
         return findFirstByName(style.getName())
                 .orElseGet(() -> {
                     LOGGER.info("Style created.");
@@ -61,6 +65,10 @@ public class StyleService implements DictionaryService {
 
     @Override
     public Dictionary update(Dictionary style) {
+
+        if (style.getName() == null || style.getName().isBlank()) {
+            return null;
+        }
 
         return findFirstByName(style.getName())
                 .orElseGet(() -> {

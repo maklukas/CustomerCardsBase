@@ -51,6 +51,10 @@ public class ColorService implements DictionaryService {
     @Override
     public Dictionary create(Dictionary color) {
 
+        if (color.getName() == null || color.getName().isBlank()) {
+            return null;
+        }
+
         return findFirstByName(color.getName())
                 .orElseGet(() -> {
                     LOGGER.info("Color created.");
@@ -60,6 +64,10 @@ public class ColorService implements DictionaryService {
 
     @Override
     public Dictionary update(Dictionary color) {
+
+        if (color.getName() == null || color.getName().isBlank()) {
+            return null;
+        }
 
         return findFirstByName(color.getName())
                 .orElseGet(() -> {

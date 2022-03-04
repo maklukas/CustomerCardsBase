@@ -51,6 +51,10 @@ public class MethodService implements DictionaryService {
     @Override
     public Dictionary create(Dictionary method) {
 
+        if (method.getName() == null || method.getName().isBlank()) {
+            return null;
+        }
+
         return findFirstByName(method.getName())
                 .orElseGet(() -> {
                     LOGGER.info("Method created.");
@@ -61,6 +65,10 @@ public class MethodService implements DictionaryService {
 
     @Override
     public Dictionary update(Dictionary method) {
+
+        if (method.getName() == null || method.getName().isBlank()) {
+            return null;
+        }
 
         return findFirstByName(method.getName())
                 .orElseGet(() -> {

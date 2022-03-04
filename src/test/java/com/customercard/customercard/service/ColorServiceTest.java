@@ -68,6 +68,13 @@ class ColorServiceTest {
 
     @Test
     void shouldCreate() {
+
+        //given
+        Color nullNamedColor = new Color();
+        nullNamedColor.setId("testNullNamedId");
+        assertNull(service.create(nullNamedColor));
+
+        //then
         assertEquals(collectionSize + 1, service.getAll().size());
     }
 
