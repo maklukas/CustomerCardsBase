@@ -12,6 +12,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.Registration;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -36,10 +37,12 @@ public class PlanView extends VerticalLayout {
     private List<CustomerWork> works;
     private LocalDate theDate;
     private final Span monthName;
+    private final List<Registration> registrations;
 
     public PlanView(CalendarService service, CustomerService customerService) {
         this.service = service;
         this.customerService = customerService;
+        this.registrations = new ArrayList<>();
         theDate = service.getTheFirstDateOfTheMonth(LocalDate.now());
         works = customerService.getWorksInCalendarMonth(theDate);
         horizontals = new ArrayList<>();
@@ -145,6 +148,7 @@ public class PlanView extends VerticalLayout {
 
     private void initCalendarFields() {
         LocalDate theDateOfFirstDayAtTheCalendar = service.getTheDateOfFirstDayAtTheCalendar(theDate);
+        clearAllRegistrations();
 
         for (int i = 7; i < 49; i++) {
             ComponentStyle.setCalendarFieldsStyle(calendarFields.get(i));
@@ -174,18 +178,24 @@ public class PlanView extends VerticalLayout {
     private void splitWorks() {
 
         works.stream()
-                .filter(w -> w.getDate().isPresent())
+                .filter(w -> w.getDate() != null)
                 .forEach(w -> addTheLayoutContent(
                         service.computeFieldNumber(
                                 theDate,
-                                w.getDate().orElse(null).toLocalDate()),
+                                w.getDate().toLocalDate()),
                         w.toString()));
     }
 
     private void addTheLayoutOnClickEvent(int id, LocalDate date) {
-        calendarFields.get(id).addClickListener(it ->
-            openPopup(date)
+        Registration registration = calendarFields.get(id).addClickListener(it ->
+                openPopup(date)
         );
+
+        registrations.add(registration);
+    }
+
+    private void clearAllRegistrations() {
+        registrations.forEach(Registration::remove);
     }
 
     private void openPopup(LocalDate date) {
@@ -215,9 +225,9 @@ public class PlanView extends VerticalLayout {
 
         works.setColumns("name", "surname");
         works.addColumn(it ->
-                dateTimeFormatter.format(Objects.requireNonNull(it.getDate().orElse(null)))
+                dateTimeFormatter.format(Objects.requireNonNull(it.getDate()))
                 )
-                .setComparator(it -> it.getDate().orElseThrow(() -> new RuntimeException("No date passed")))
+                .setComparator(CustomerWork::getDate)
                 .setHeader("Date");
 
         return works;

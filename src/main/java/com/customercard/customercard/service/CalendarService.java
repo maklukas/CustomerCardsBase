@@ -25,7 +25,6 @@ public class CalendarService {
         return getTheFirstDateOfTheMonth(date).minusDays(theFirstDayNumber - 1);
     }
 
-
     public int computeFieldNumber(LocalDate monthDate, LocalDate date) {
 
         LocalDate first = getTheDateOfFirstDayAtTheCalendar(monthDate);

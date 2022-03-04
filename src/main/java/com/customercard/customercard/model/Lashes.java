@@ -4,14 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Optional;
 
 @Document("lashes")
 @Setter
@@ -40,7 +36,7 @@ public class Lashes extends AbstractEntity {
         return Objects.hash(style, method, color, comment, date, nextDate);
     }
 
-    public Optional<LocalDateTime> getNextDate() {
-        return Optional.ofNullable(nextDate);
+    public LocalDateTime getNextDate() {
+        return nextDate;
     }
 }

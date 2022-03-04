@@ -8,11 +8,13 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service("lashesService")
@@ -55,14 +57,13 @@ public class LashesService {
     public Lashes create(Lashes lashes) {
         LOGGER.info("Lashes created.");
 
-        if (validateIfExists(lashes)) {
-            return findFirstEqual(lashes);
-        }
-
-        setDates(lashes);
-        setSubClasses(lashes);
-
-        return repo.save(lashes);
+        return findFirstEqual(lashes)
+                .orElseGet(() -> {
+                            setDates(lashes);
+                            setSubClasses(lashes);
+                            return repo.save(lashes);
+                        }
+                );
     }
 
     private void setDates(Lashes lashes) {
@@ -72,14 +73,13 @@ public class LashesService {
     }
 
     public Lashes update(Lashes lashes) {
-
-        if (validateIfExists(lashes)) {
-            return findFirstEqual(lashes);
-        }
-
-        setSubClasses(lashes);
         LOGGER.info("Lashes updated.");
-        return repo.save(lashes);
+        return findFirstEqual(lashes)
+                .orElseGet(() -> {
+                            setSubClasses(lashes);
+                            return repo.save(lashes);
+                        }
+                );
     }
 
     public boolean delete(String id) {
@@ -119,40 +119,22 @@ public class LashesService {
     }
 
     private void getColorClass(Lashes lashes) {
-        if (!colorService.validateIfExists(new Color(lashes.getColor()))) {
-            colorService.create(new Color(lashes.getColor()));
-        }
+        colorService.findFirstByName(lashes.getColor())
+                .orElseGet(() -> (Color) colorService.create(new Color(lashes.getColor())));
     }
 
     private void getStyleClass(Lashes lashes) {
-        if (!styleService.validateIfExists(new Style(lashes.getStyle()))) {
-            styleService.create(new Style(lashes.getStyle()));
-        }
+        styleService.findFirstByName(lashes.getColor())
+                .orElseGet(() -> (Style) styleService.create(new Style(lashes.getStyle())));
     }
 
     private void getMethodClass(Lashes lashes) {
-        if (!methodService.validateIfExists(new Method(lashes.getMethod()))) {
-            methodService.create(new Method(lashes.getMethod()));
-        }
+        methodService.findFirstByName(lashes.getColor())
+                .orElseGet(() -> (Method) methodService.create(new Method(lashes.getMethod())));
     }
 
-    public boolean validateIfExists(Lashes lashes) {
-
-        if (findFirstEqual(lashes) != null) {
-            LOGGER.info("Lashes already exists.");
-            return true;
-        }
-        return false;
-    }
-
-    public Lashes findFirstEqual(Lashes lashes) {
-        if (repo.findAll().size() > 0) {
-            return repo.findAll().stream()
-                    .filter(l -> l.equals(lashes))
-                    .findFirst()
-                    .orElse(null);
-        }
-        return null;
+    private Optional<Lashes> findFirstEqual(Lashes lashes) {
+        return repo.findOne(Example.of(lashes));
     }
 
     public List<Lashes> getAll(@NotNull Customer customer, @Nullable String txt) {

@@ -19,9 +19,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.springframework.data.util.Pair.toMap;
 
 @Service("customerService")
 public class CustomerService {
@@ -167,28 +164,25 @@ public class CustomerService {
     }
 
     public List<CustomerWork> getNextWorks(@Nullable String id, @Nullable String name) {
-        List<CustomerWork> allNextWorks = getAllNextWorks();
-        Collections.sort(allNextWorks);
+        List<CustomerWork> works = new ArrayList<>();
 
-        if (id != null && !id.equals("")) {
-            allNextWorks = allNextWorks.stream()
-                    .filter(customerWork -> customerWork.getId().equals(id))
-                    .collect(Collectors.toList());
-        }
+         Optional.ofNullable(id)
+                .ifPresentOrElse(
+                       it -> getAllNextWorks().stream()
+                                .filter(work -> work.getId().equals(it))
+                                .filter(work -> work.getDate() != null)
+                                .filter(work -> work.getDate().isAfter(LocalDateTime.now()))
+                                .forEach(works::add),
+                        () ->
+                        getAllNextWorks().stream()
+                                .filter(work -> StringUtils.containsIgnoreCase(work.getName(), name) ||
+                                        StringUtils.containsIgnoreCase(work.getSurname(), name))
+                                .filter(work -> work.getDate() != null)
+                                .filter(work -> work.getDate().isAfter(LocalDateTime.now()))
+                                .forEach(works::add)
+                );
 
-        if (name != null && !name.equals("")) {
-            allNextWorks = allNextWorks.stream()
-                    .filter(customerWork ->
-                            StringUtils.containsIgnoreCase(customerWork.getName(), name) ||
-                                    StringUtils.containsIgnoreCase(customerWork.getSurname(), name))
-                    .collect(Collectors.toList());
-        }
-
-        return allNextWorks.stream()
-                .filter(customerWork -> customerWork.getDate().isPresent())
-                .filter(customerWork ->
-                        customerWork.getDate().get().isAfter(LocalDateTime.now().minusDays(1)))
-                .collect(Collectors.toList());
+        return works;
     }
 
     public List<CustomerWork> getWorksInCalendarMonth(LocalDate date) {
@@ -197,19 +191,17 @@ public class CustomerService {
 
         return CustomerGeneralMapper.mapModelToCustomerWorks(getAll()).stream()
                 .filter(l ->
-                        l.getDate().isPresent() &&
-                                l.getDate().get()
-                                        .isAfter(theFirstDayAtTheCalendar.atStartOfDay())
-                        && l.getDate().get()
-                                .isBefore(theLastDayAtTheCalendar.atStartOfDay()))
+                        l.getDate() != null &&
+                                l.getDate().isAfter(theFirstDayAtTheCalendar.atStartOfDay()) &&
+                                l.getDate().isBefore(theLastDayAtTheCalendar.atStartOfDay()))
                 .sorted()
                 .collect(Collectors.toList());
     }
 
     public List<CustomerWork> getWorksInTheDay(LocalDate date) {
         return CustomerGeneralMapper.mapModelToCustomerWorks(getAll()).stream()
-                .filter(customerWork -> customerWork.getDate().isPresent())
-                .filter(customerWork -> customerWork.getDate().get().toLocalDate().isEqual(date))
+                .filter(customerWork -> customerWork.getDate() != null)
+                .filter(customerWork -> customerWork.getDate().toLocalDate().isEqual(date))
                 .sorted()
                 .collect(Collectors.toList());
     }

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service("colorService")
@@ -50,23 +51,30 @@ public class ColorService implements DictionaryService {
     @Override
     public Dictionary create(Dictionary color) {
 
-        if (validateIfExists(color)) {
-            return findFirstByName(color.getName());
+        if (color.getName() == null || color.getName().isBlank()) {
+            return null;
         }
 
-        LOGGER.info("Color created.");
-        return repo.save((Color) color);
-
+        return findFirstByName(color.getName())
+                .orElseGet(() -> {
+                    LOGGER.info("Color created.");
+                    return repo.save((Color) color);
+                });
     }
 
     @Override
     public Dictionary update(Dictionary color) {
 
-        if (validateIfExists(color)) {
-            return findFirstByName(color.getName());
+        if (color.getName() == null || color.getName().isBlank()) {
+            return null;
         }
-        LOGGER.info("Color updated.");
-        return repo.save((Color) color);
+
+        return findFirstByName(color.getName())
+                .orElseGet(() -> {
+                    LOGGER.info("Color updated.");
+                    return repo.save((Color) color);
+                });
+
     }
 
     @Override
@@ -87,24 +95,11 @@ public class ColorService implements DictionaryService {
     }
 
     @Override
-    public boolean validateIfExists(Dictionary color) {
-        if (repo.findByName(color.getName()).size() > 0) {
-            LOGGER.info("Color already exists.");
-            return true;
-        } else if (color.getName() == null || color.getName().equals("")) {
-            LOGGER.info("Empty color passed.");
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public Color findFirstByName(String name) {
+    public Optional<Color> findFirstByName(String name) {
         return repo
                 .findByName(name)
                 .stream()
-                .findFirst()
-                .orElseThrow();
+                .findFirst();
     }
 
 }

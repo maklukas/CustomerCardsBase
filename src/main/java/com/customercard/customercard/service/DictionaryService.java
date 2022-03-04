@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface DictionaryService {
 
@@ -15,7 +16,6 @@ public interface DictionaryService {
     Dictionary update(Dictionary dictionary);
     boolean delete(String id);
     boolean partialUpdate(Dictionary dictionary, Map<String, Object> updates);
-    boolean validateIfExists(Dictionary dictionary);
-    Dictionary findFirstByName(String name);
+    Optional<? extends Dictionary> findFirstByName(String name);
 
 }

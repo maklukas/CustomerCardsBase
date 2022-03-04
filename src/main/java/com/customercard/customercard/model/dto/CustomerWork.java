@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Optional;
 
 @Getter
 @Setter
@@ -25,8 +24,8 @@ public class CustomerWork implements Comparable<CustomerWork> {
 
     @Override
     public int compareTo(@NotNull CustomerWork o) {
-        if (getDate().isEmpty() || o.getDate().isEmpty()) return 0;
-        return getDate().get().compareTo(o.getDate().get());
+        if (getDate() != null || o.getDate() != null) return 0;
+        return getDate().compareTo(o.getDate());
     }
 
     @Override
@@ -46,7 +45,7 @@ public class CustomerWork implements Comparable<CustomerWork> {
         return formatter.format(date) + " | " + n + s;
     }
 
-    public Optional<LocalDateTime> getDate() {
-        return Optional.of(date);
+    public LocalDateTime getDate() {
+        return date;
     }
 }
