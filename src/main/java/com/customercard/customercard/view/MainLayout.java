@@ -6,6 +6,8 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
@@ -43,8 +45,6 @@ public class MainLayout extends AppLayout {
 
     }
 
-
-
     public Button toggleButton() {
         Button toggle = new Button();
         toggle.setIcon(VaadinIcon.ADJUST.create());
@@ -78,11 +78,7 @@ public class MainLayout extends AppLayout {
 
     private <T extends Component> Tab createTab(VaadinIcon viewIcon, String viewName, Class<T> route) {
         Icon icon = viewIcon.create();
-        icon.getStyle()
-                .set("box-sizing", "border-box")
-                .set("margin-inline-end", "var(--lumo-space-m)")
-                .set("margin-inline-start", "var(--lumo-space-xs)")
-                .set("padding", "var(--lumo-space-xs)");
+        ComponentStyle.setMenuIconStyle(icon);
 
         RouterLink link = new RouterLink();
         link.add(icon, new Span(viewName));

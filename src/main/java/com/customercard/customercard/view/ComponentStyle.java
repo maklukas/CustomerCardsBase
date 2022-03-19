@@ -6,10 +6,12 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
+import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @CssImport(value = "./styles/myGridStyles.css")
@@ -85,6 +87,13 @@ public abstract class ComponentStyle {
             screenWidth.set(receiver.getScreenWidth());
         });
         return screenWidth.get();
+    }
+    public static void setMenuIconStyle(Icon icon) {
+        icon.getStyle()
+                .set("box-sizing", "border-box")
+                .set("margin-inline-end", "var(--lumo-space-m)")
+                .set("margin-inline-start", "var(--lumo-space-xs)")
+                .set("padding", "var(--lumo-space-xs)");
     }
 
 }

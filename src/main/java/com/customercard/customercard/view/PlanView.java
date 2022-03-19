@@ -20,10 +20,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 
 
 @Route(value = "/plan", layout = MainLayout.class)
@@ -76,14 +73,14 @@ public class PlanView extends VerticalLayout {
         mainLayout.setDefaultHorizontalComponentAlignment(Alignment.STRETCH);
 
         List<HorizontalLayout> horizontalLayouts = new ArrayList<>();
-        for (int i = 0; i < 7 ; i++) {
+        for (int i = 0; i < 7; i++) {
             horizontalLayouts.add(new HorizontalLayout());
         }
 
         horizontals.addAll(horizontalLayouts);
 
-        for (HorizontalLayout hl: horizontalLayouts) {
-            for (int i = 0; i < 7 ; i++) {
+        for (HorizontalLayout hl : horizontalLayouts) {
+            for (int i = 0; i < 7; i++) {
                 VerticalLayout vl = new VerticalLayout();
                 calendarFields.add(vl);
                 hl.add(vl);
@@ -96,7 +93,15 @@ public class PlanView extends VerticalLayout {
     private void addTheLayoutContent(int id, String text) {
         Span span = new Span(text);
         ComponentStyle.setCalendarFieldTextStyle(span);
-        calendarFields.get(id).add(span);
+        switch (calendarFields.get(id).getComponentCount()) {
+            case 4:
+                calendarFields.get(id).add("...");
+                break;
+            case 5:
+                break;
+            default:
+                calendarFields.get(id).add(span);
+        }
     }
 
     private void removeTheLayoutContent(int id) {
@@ -137,7 +142,7 @@ public class PlanView extends VerticalLayout {
         String text;
         for (int i = 0; i < 7; i++) {
             Span day = new Span();
-            text = DayOfWeek.of(i+1).getDisplayName(TextStyle.SHORT, Locale.getDefault());
+            text = DayOfWeek.of(i + 1).getDisplayName(TextStyle.SHORT, Locale.getDefault());
 
             day.setText(text);
             calendarFields.get(i).add(day);
@@ -166,7 +171,7 @@ public class PlanView extends VerticalLayout {
     }
 
     private void setHorizontalsStyles() {
-        for (HorizontalLayout hl: horizontals) {
+        for (HorizontalLayout hl : horizontals) {
             ComponentStyle.setCalendarHorizontals(hl);
         }
     }
@@ -225,7 +230,7 @@ public class PlanView extends VerticalLayout {
 
         works.setColumns("name", "surname");
         works.addColumn(it ->
-                dateTimeFormatter.format(Objects.requireNonNull(it.getDate()))
+                        dateTimeFormatter.format(Objects.requireNonNull(it.getDate()))
                 )
                 .setComparator(CustomerWork::getDate)
                 .setHeader("Date");
