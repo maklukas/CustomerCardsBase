@@ -1,8 +1,6 @@
 node_modules
 HELP.md
-.gradle
 build/
-!gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
@@ -32,7 +30,6 @@ out/
 /nbbuild/
 /dist/
 /nbdist/
-/.nb-gradle/
 
 ### VS Code ###
 .vscode/
@@ -40,13 +37,10 @@ out/
 
 ### MAIN ###
 src/main/resources/application.properties
-gradlew
-gradlew.bat
 package.json
 package-lock.json
 webpack.config.js
 webpack.generated.js
 target
 config
-gradle
 .gitignore
